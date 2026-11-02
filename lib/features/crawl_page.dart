@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import '../catalog/stat_sites.dart';
 import '../core/settings.dart';
 import '../core/theme.dart';
-import '../core/utils.dart';
 import '../core/widgets.dart';
 import '../data/database.dart';
 import '../state/crawl_controller.dart';

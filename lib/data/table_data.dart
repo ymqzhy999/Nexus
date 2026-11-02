@@ -258,3 +258,14 @@ String formatPercent(double v, {int digits = 2}) {
   if (v.isNaN || v.isInfinite) return '—';
   return '${(v * 100).toStringAsFixed(digits)}%';
 }
+
+
+extension DatasetTableX on Dataset {
+  int get columnCount {
+    try {
+      final v = jsonDecode(columnsJson);
+      if (v is List) return v.length;
+    } catch (_) {}
+    return 0;
+  }
+}

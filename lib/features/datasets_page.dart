@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/theme.dart';
 import '../core/widgets.dart';
 import '../data/database.dart';
+import '../data/table_data.dart';
 import '../state/providers.dart';
 
 class DatasetsPage extends ConsumerStatefulWidget {
