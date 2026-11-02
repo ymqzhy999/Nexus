@@ -53,8 +53,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.4.1
-          name: Nexus v0.4.1 — Crawler
+          tag_name: v0.4.2
+          name: Nexus v0.4.2 — Crawler
           body: |
             Nexus v0.4.0 — 统计年鉴爬虫
             关键词 → 站点 → 全站抓表；不再需要 URL。

@@ -244,7 +244,11 @@ class SiteCrawler {
 
     if (terms.isNotEmpty) {
       final rowLabels = t.rows.take(40).map((r) => r.take(2).join(' ')).join(' ');
-      final hay = '${t.title} ${t.headers.join(' ')} $rowLabels $pageTitle $pageUrl'.toLowerCase();
+      // A table's fallback title is the page title; using it would make every
+      // table on a province page match the province term. Only use a real
+      // caption/sheet title, plus headers and row labels.
+      final caption = pageTitle.isNotEmpty && t.title.trim() == pageTitle.trim() ? '' : t.title;
+      final hay = '$caption ${t.headers.join(' ')} $rowLabels'.toLowerCase();
       if (!terms.any((term) => hay.contains(term))) return false;
     }
 
