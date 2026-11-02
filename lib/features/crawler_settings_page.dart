@@ -34,6 +34,7 @@ class _CrawlerSettingsPageState extends ConsumerState<CrawlerSettingsPage> {
     final s = ref.watch(appSettingsProvider);
     final datasets = ref.watch(datasetsProvider).valueOrNull ?? [];
     final jobs = ref.watch(crawlJobsProvider).valueOrNull ?? [];
+    final pages = ref.watch(capturedPagesProvider).valueOrNull ?? [];
     return Scaffold(
       backgroundColor: NColors.bg,
       appBar: AppBar(
@@ -137,10 +138,10 @@ class _CrawlerSettingsPageState extends ConsumerState<CrawlerSettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('${datasets.length} 个数据集 · ${jobs.length} 个任务', style: kMono.copyWith(fontSize: 10)),
+                Text('${pages.length} 个页面 · ${datasets.length} 个表格 · ${jobs.length} 个任务', style: kMono.copyWith(fontSize: 10)),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => _clear(datasets.length, jobs.length),
+                  onPressed: () => _clear(pages.length, datasets.length, jobs.length),
                   child: const Text('清空数据集与任务', style: TextStyle(fontSize: 11, color: Color(0xFFFF9AA8))),
                 ),
               ],
@@ -154,13 +155,13 @@ class _CrawlerSettingsPageState extends ConsumerState<CrawlerSettingsPage> {
     );
   }
 
-  Future<void> _clear(int datasets, int jobs) async {
+  Future<void> _clear(int pages, int datasets, int jobs) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: NColors.surface,
         title: const Text('清空本地采集数据？', style: TextStyle(fontSize: 15)),
-        content: Text('将删除 $datasets 个数据集和 $jobs 个任务，不可恢复。', style: const TextStyle(fontSize: 11.5)),
+        content: Text('将删除 $pages 个页面、$datasets 个表格和 $jobs 个任务，不可恢复。', style: const TextStyle(fontSize: 11.5)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('取消')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('清空', style: TextStyle(color: Color(0xFFFF9AA8)))),
@@ -169,6 +170,7 @@ class _CrawlerSettingsPageState extends ConsumerState<CrawlerSettingsPage> {
     );
     if (ok != true) return;
     final db = ref.read(dbProvider);
+    await db.delete(db.capturedPages).go();
     await db.delete(db.dataAnalyses).go();
     await db.delete(db.datasets).go();
     await db.delete(db.crawlJobs).go();

@@ -102,6 +102,18 @@ final crawlJobsProvider = StreamProvider<List<CrawlJob>>((ref) {
   return q.watch();
 });
 
+final capturedPagesProvider = StreamProvider<List<CapturedPage>>((ref) {
+  final db = ref.watch(dbProvider);
+  final q = db.select(db.capturedPages)..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+  return q.watch();
+});
+
+final capturedPageProvider = FutureProvider.family<CapturedPage?, int>((ref, id) {
+  return (ref.watch(dbProvider).select(ref.watch(dbProvider).capturedPages)
+        ..where((t) => t.id.equals(id)))
+      .getSingleOrNull();
+});
+
 final crawlControllerProvider = StateNotifierProvider<CrawlController, CrawlState>((ref) {
   return CrawlController(
     db: ref.watch(dbProvider),

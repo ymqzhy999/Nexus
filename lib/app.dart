@@ -5,7 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'core/theme.dart';
 import 'features/crawl_page.dart';
 import 'features/crawler_settings_page.dart';
-import 'features/datasets_page.dart';
+import 'features/page_detail_page.dart';
+import 'features/results_page.dart';
 import 'features/simple_dataset_page.dart';
 import 'features/sites_page.dart';
 import 'features/shell.dart';
@@ -21,7 +22,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/crawl', builder: (context, state) => const CrawlPage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/datasets', builder: (context, state) => const DatasetsPage()),
+            GoRoute(path: '/datasets', builder: (context, state) => const ResultsPage()),
           ]),
           StatefulShellBranch(routes: [
             GoRoute(path: '/sites', builder: (context, state) => const SitesPage()),
@@ -35,6 +36,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/dataset/:id',
         builder: (context, state) => SimpleDatasetPage(
           datasetId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
+        ),
+      ),
+      GoRoute(
+        path: '/page/:id',
+        builder: (context, state) => PageDetailPage(
+          pageId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
         ),
       ),
       GoRoute(

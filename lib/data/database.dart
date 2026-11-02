@@ -17,12 +17,31 @@ class CrawlJobs extends Table {
   TextColumn get seedsJson => text().withDefault(const Constant('[]'))();
   TextColumn get status => text().withDefault(const Constant('running'))();
   IntColumn get pages => integer().withDefault(const Constant(0))();
+  IntColumn get pagesSaved => integer().withDefault(const Constant(0))();
   IntColumn get tablesFound => integer().withDefault(const Constant(0))();
   IntColumn get datasetsSaved => integer().withDefault(const Constant(0))();
   TextColumn get errorsJson => text().withDefault(const Constant('[]'))();
   TextColumn get configJson => text().withDefault(const Constant('{}'))();
   DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
   DateTimeColumn get finishedAt => dateTime().nullable()();
+}
+
+
+class CapturedPages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get jobId => integer().nullable()();
+  TextColumn get url => text()();
+  TextColumn get title => text().withDefault(const Constant(''))();
+  TextColumn get domain => text().withDefault(const Constant(''))();
+  TextColumn get text => text().withDefault(const Constant(''))();
+  TextColumn get excerpt => text().withDefault(const Constant(''))();
+  TextColumn get status => text().withDefault(const Constant('ok'))();
+  IntColumn get httpStatus => integer().withDefault(const Constant(0))();
+  IntColumn get tableCount => integer().withDefault(const Constant(0))();
+  TextColumn get attachmentsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get keyword => text().withDefault(const Constant(''))();
+  BoolColumn get matched => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
 }
 
 class Datasets extends Table {
@@ -222,12 +241,13 @@ class SettingsEntries extends Table {
   Datasets,
   DataAnalyses,
   CrawlJobs,
+  CapturedPages,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -246,6 +266,12 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) {
             await m.createTable(crawlJobs);
           }
+          if (from < 4) {
+            if (from >= 3) {
+              await m.addColumn(crawlJobs, crawlJobs.pagesSaved);
+            }
+            await m.createTable(capturedPages);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -261,6 +287,8 @@ class AppDatabase extends _$AppDatabase {
     'CREATE INDEX IF NOT EXISTS idx_datasets_created ON datasets(created_at DESC)',
     'CREATE INDEX IF NOT EXISTS idx_data_analyses_dataset ON data_analyses(dataset_id)',
     'CREATE INDEX IF NOT EXISTS idx_crawl_jobs_created ON crawl_jobs(created_at DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_captured_pages_job ON captured_pages(job_id)',
+    'CREATE INDEX IF NOT EXISTS idx_captured_pages_created ON captured_pages(created_at DESC)',
   ];
 
   Future<void> _createSearchIndex() async {
@@ -374,6 +402,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> wipeAll() async {
     await transaction(() async {
       for (final name in const [
+        'captured_pages',
         'crawl_jobs',
         'data_analyses',
         'datasets',

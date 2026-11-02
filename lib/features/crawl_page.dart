@@ -156,6 +156,7 @@ class _CrawlPageState extends ConsumerState<CrawlPage> {
     final crawl = ref.watch(crawlControllerProvider);
     final jobs = ref.watch(crawlJobsProvider);
     final datasets = ref.watch(datasetsProvider);
+    final pages = ref.watch(capturedPagesProvider);
     final keyword = _keyword.text.trim();
     final suggestions = suggestStatSites(keyword, limit: 8);
     final selectedSites = statSites.where((s) => _selected.contains(s.id)).toList();
@@ -424,6 +425,59 @@ class _CrawlPageState extends ConsumerState<CrawlPage> {
             ),
             const SizedBox(height: 18),
             SectionHeader(
+              kicker: 'RECENT PAGES',
+              title: '最近抓到的页面',
+              trailing: GestureDetector(
+                onTap: () => context.push('/datasets'),
+                child: const Text('全部', style: TextStyle(fontSize: 10.5, color: NColors.cyan)),
+              ),
+            ),
+            pages.when(
+              loading: () => const SizedBox(height: 20),
+              error: (e, _) => Text('$e', style: const TextStyle(color: NColors.muted)),
+              data: (list) {
+                if (list.isEmpty) {
+                  return Text('每个爬到的页面都会进这里，哪怕没有表格。', style: Theme.of(context).textTheme.bodySmall);
+                }
+                return Column(children: [
+                  for (final p in list.take(4))
+                    GlassCard(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      onTap: () => context.push('/page/${p.id}'),
+                      child: Row(
+                        children: [
+                          Icon(
+                            p.matched ? Icons.article : Icons.article_outlined,
+                            size: 17,
+                            color: p.matched ? NColors.lime : NColors.muted,
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(p.title.isEmpty ? p.url : p.title,
+                                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                                const SizedBox(height: 2),
+                                Text('${p.domain} · ${p.status} · ${p.tableCount} 表',
+                                    style: kMono.copyWith(fontSize: 8)),
+                                if (p.excerpt.isNotEmpty)
+                                  Text(p.excerpt, maxLines: 1, overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(fontSize: 9, color: NColors.muted)),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, size: 16, color: NColors.muted),
+                        ],
+                      ),
+                    ),
+                ]);
+              },
+            ),
+            const SizedBox(height: 18),
+            SectionHeader(
               kicker: 'RECENT DATASETS',
               title: '最近抓到的表',
               trailing: GestureDetector(
@@ -569,10 +623,10 @@ class _ProgressCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Expanded(child: _mini('已抓页面', '${state.pages}')),
-              Expanded(child: _mini('队列', '${state.queued}')),
+              Expanded(child: _mini('已爬', '${state.pages}')),
+              Expanded(child: _mini('入库页', '${state.pagesSaved}')),
               Expanded(child: _mini('表格', '${state.tables}')),
-              Expanded(child: _mini('入库', '${state.datasets}')),
+              Expanded(child: _mini('数据集', '${state.datasets}')),
             ],
           ),
           if (state.errors.isNotEmpty) ...[
@@ -637,7 +691,7 @@ class _JobCard extends ConsumerWidget {
                 Text(job.keyword, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 3),
-                Text('${job.pages} 页 · ${job.tablesFound} 表 · 入库 ${job.datasetsSaved} · ${job.status}',
+                Text('${job.pages} 页 · 存 ${job.pagesSaved} 页 · ${job.tablesFound} 表 · ${job.datasetsSaved} 数据集 · ${job.status}',
                     style: kMono.copyWith(fontSize: 8)),
               ],
             ),

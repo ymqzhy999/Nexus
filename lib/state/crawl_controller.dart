@@ -12,6 +12,7 @@ class CrawlState {
   final bool running;
   final int? jobId;
   final int pages;
+  final int pagesSaved;
   final int queued;
   final int tables;
   final int datasets;
@@ -24,6 +25,7 @@ class CrawlState {
     this.running = false,
     this.jobId,
     this.pages = 0,
+    this.pagesSaved = 0,
     this.queued = 0,
     this.tables = 0,
     this.datasets = 0,
@@ -89,6 +91,7 @@ class CrawlController extends StateNotifier<CrawlState> {
             running: true,
             jobId: jobId,
             pages: p.pages,
+            pagesSaved: p.pagesSaved,
             queued: p.queued,
             tables: p.tables,
             datasets: p.datasets,
@@ -96,8 +99,25 @@ class CrawlController extends StateNotifier<CrawlState> {
             errors: p.errors,
           );
           if (p.pages % 5 == 0) {
-            _updateJob(jobId, p.pages, p.tables, p.datasets, p.errors, 'running');
+            _updateJob(jobId, p.pages, p.pagesSaved, p.tables, p.datasets, p.errors, 'running');
           }
+        },
+        onPage: (page) async {
+          await db.into(db.capturedPages).insert(CapturedPagesCompanion.insert(
+            jobId: Value(jobId),
+            url: page.url,
+            title: Value(page.title),
+            domain: Value(page.domain),
+            text: Value(page.text),
+            excerpt: Value(page.excerpt),
+            status: Value(page.status),
+            httpStatus: Value(page.httpStatus),
+            tableCount: Value(page.tableCount),
+            attachmentsJson: Value(jsonEncode(page.attachments.map((e) => e.toJson()).toList())),
+            keyword: Value(keyword.trim()),
+            matched: Value(page.matched),
+          ));
+          return true;
         },
         onTable: (table) async {
           final withMeta = TableData(
@@ -118,22 +138,24 @@ class CrawlController extends StateNotifier<CrawlState> {
         isCancelled: () => _cancelled,
       );
       final status = outcome.cancelled ? 'cancelled' : 'done';
-      await _updateJob(jobId, outcome.pages, outcome.tables, outcome.datasets, outcome.errors, status, finished: true);
+      await _updateJob(jobId, outcome.pages, outcome.pagesSaved, outcome.tables, outcome.datasets, outcome.errors, status, finished: true);
       if (!mounted) return;
       state = CrawlState(
         jobId: jobId,
         pages: outcome.pages,
+        pagesSaved: outcome.pagesSaved,
         tables: outcome.tables,
         datasets: outcome.datasets,
         errors: outcome.errors,
         finished: true,
       );
     } catch (e) {
-      await _updateJob(jobId, state.pages, state.tables, state.datasets, [...state.errors, e.toString()], 'failed', finished: true);
+      await _updateJob(jobId, state.pages, state.pagesSaved, state.tables, state.datasets, [...state.errors, e.toString()], 'failed', finished: true);
       if (!mounted) return;
       state = CrawlState(
         jobId: jobId,
         pages: state.pages,
+        pagesSaved: state.pagesSaved,
         tables: state.tables,
         datasets: state.datasets,
         errors: [...state.errors, e.toString()],
@@ -150,6 +172,7 @@ class CrawlController extends StateNotifier<CrawlState> {
   Future<void> _updateJob(
     int jobId,
     int pages,
+    int pagesSaved,
     int tables,
     int datasets,
     List<String> errors,
@@ -158,6 +181,7 @@ class CrawlController extends StateNotifier<CrawlState> {
   }) async {
     await (db.update(db.crawlJobs)..where((t) => t.id.equals(jobId))).write(CrawlJobsCompanion(
       pages: Value(pages),
+      pagesSaved: Value(pagesSaved),
       tablesFound: Value(tables),
       datasetsSaved: Value(datasets),
       errorsJson: Value(jsonEncode(errors.take(30).toList())),

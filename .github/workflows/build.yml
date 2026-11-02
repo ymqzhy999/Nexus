@@ -53,10 +53,10 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.4.2
-          name: Nexus v0.4.2 — Crawler
+          tag_name: v0.5.0
+          name: Nexus v0.5.0 — Pages + Tables
           body: |
-            Nexus v0.4.0 — 统计年鉴爬虫
+            Nexus v0.5.0 — 页面 + 表格 + 附件
             关键词 → 站点 → 全站抓表；不再需要 URL。
             - 站点库：国家统计局/中国统计年鉴/省份年鉴/数据开放平台
             - 站内 BFS 抓取：HTML 表格、XLSX、CSV、frame 链接

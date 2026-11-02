@@ -12,7 +12,7 @@ class MainShell extends StatelessWidget {
 
   static const _items = [
     (Icons.radar, '采集'),
-    (Icons.table_chart_outlined, '数据集'),
+    (Icons.table_chart_outlined, '结果'),
     (Icons.public, '站点'),
     (Icons.tune, '设置'),
   ];

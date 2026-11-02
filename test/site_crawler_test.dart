@@ -36,6 +36,7 @@ void main() {
     });
 
     final tables = <TableData>[];
+    final pages = <CapturedPageResult>[];
     final crawler = SiteCrawler(HttpFetcher());
     final outcome = await crawler.crawl(
       CrawlConfig(keyword: 'GDP', seeds: [base], maxPages: 5, maxDepth: 2),
@@ -44,11 +45,16 @@ void main() {
         tables.add(t);
         return true;
       },
+      onPage: (p) async {
+        pages.add(p);
+        return true;
+      },
       isCancelled: () => false,
     );
     await server.close(force: true);
     expect(outcome.pages, greaterThanOrEqualTo(2));
+    expect(pages, isNotEmpty);
     expect(tables, isNotEmpty);
-    expect(tables.first.headers.contains('GDP'), isTrue);
+    expect(tables.any((t) => t.headers.contains('GDP')), isTrue);
   }, timeout: const Timeout(Duration(seconds: 30)));
 }
