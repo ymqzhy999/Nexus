@@ -60,7 +60,7 @@ class PageDetailPage extends ConsumerWidget {
                     style: const TextStyle(fontSize: 10, color: NColors.cyan)),
               ),
               const SizedBox(height: 5),
-              Text('${page.domain} · HTTP ${page.httpStatus} · ${page.tableCount} 张表 · ${page.text.length} 字符',
+              Text('${page.domain} · HTTP ${page.httpStatus} · ${page.tableCount} 张表 · ${page.content.length} 字符',
                   style: kMono.copyWith(fontSize: 8.5)),
               if (page.status == 'pdf') ...[
                 const SizedBox(height: 10),
@@ -126,7 +126,7 @@ class PageDetailPage extends ConsumerWidget {
               const SizedBox(height: 16),
               SectionHeader(kicker: 'TEXT', title: '正文/数据摘要'),
               const SizedBox(height: 6),
-              if (page.text.trim().isEmpty)
+              if (page.content.trim().isEmpty)
                 Text('这个页面没有可提取的正文；可能是 PDF、表格下载或纯 JS 页面。',
                     style: Theme.of(context).textTheme.bodySmall)
               else
@@ -138,7 +138,7 @@ class PageDetailPage extends ConsumerWidget {
                     border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
                   ),
                   child: SelectableText(
-                    page.text,
+                    page.content,
                     style: const TextStyle(fontSize: 11, height: 1.7, color: NColors.text),
                   ),
                 ),

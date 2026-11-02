@@ -108,7 +108,7 @@ class CrawlController extends StateNotifier<CrawlState> {
             url: page.url,
             title: Value(page.title),
             domain: Value(page.domain),
-            text: Value(page.text),
+            content: Value(page.text),
             excerpt: Value(page.excerpt),
             status: Value(page.status),
             httpStatus: Value(page.httpStatus),

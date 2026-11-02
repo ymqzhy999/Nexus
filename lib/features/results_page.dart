@@ -214,7 +214,7 @@ class _ResultsPageState extends ConsumerState<ResultsPage> with SingleTickerProv
                 Text(p.title.isEmpty ? p.url : p.title, maxLines: 2, overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 3),
-                Text('${p.domain} · ${p.status} · ${p.tableCount} 表 · ${p.text.length} 字',
+                Text('${p.domain} · ${p.status} · ${p.tableCount} 表 · ${p.content.length} 字',
                     style: kMono.copyWith(fontSize: 8.5)),
                 if (p.excerpt.isNotEmpty) ...[
                   const SizedBox(height: 3),

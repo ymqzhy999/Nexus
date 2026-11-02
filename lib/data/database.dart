@@ -33,7 +33,7 @@ class CapturedPages extends Table {
   TextColumn get url => text()();
   TextColumn get title => text().withDefault(const Constant(''))();
   TextColumn get domain => text().withDefault(const Constant(''))();
-  TextColumn get text => text().withDefault(const Constant(''))();
+  TextColumn get content => text().withDefault(const Constant(''))();
   TextColumn get excerpt => text().withDefault(const Constant(''))();
   TextColumn get status => text().withDefault(const Constant('ok'))();
   IntColumn get httpStatus => integer().withDefault(const Constant(0))();
