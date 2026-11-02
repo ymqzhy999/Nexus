@@ -147,7 +147,7 @@ class _SitesPageState extends ConsumerState<SitesPage> {
               ),
             ),
             Container(
-              padding: EdgeInsets.fromLTRB(14, 9, 14, MediaQuery.paddingOf(context).bottom + 10),
+              padding: EdgeInsets.fromLTRB(14, 9, 14, MediaQuery.paddingOf(context).bottom + 92),
               decoration: BoxDecoration(
                 color: NColors.surface,
                 border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.07))),
