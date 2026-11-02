@@ -236,10 +236,11 @@ class AppDatabase extends _$AppDatabase {
     if (q.isEmpty) return const [];
     List<int> ids = [];
     if (q.length >= 3) {
+      final escaped = q.replaceAll('"', '""');
       try {
         final rows = await customSelect(
           'SELECT rowid AS doc_id FROM doc_fts WHERE doc_fts MATCH ? ORDER BY rank LIMIT ?',
-          variables: [Variable.withString('"${q.replaceAll('"', '""')}"'), Variable.withInt(limit)],
+          variables: [Variable.withString('"$escaped"'), Variable.withInt(limit)],
         ).get();
         ids = rows.map((r) => r.read<int>('doc_id')).toList();
       } catch (_) {}
