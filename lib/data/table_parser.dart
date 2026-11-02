@@ -161,7 +161,14 @@ class TableParser {
       final rawRows = <List<String>>[];
       final trs = table.querySelectorAll('tr');
       for (final tr in trs) {
-        final cells = tr.querySelectorAll('th,td').map((c) => c.text.replaceAll(RegExp(r'\s+'), ' ').trim()).toList();
+        final cells = <String>[];
+        for (final cell in tr.querySelectorAll('th,td')) {
+          final span = (int.tryParse(cell.attributes['colspan'] ?? '1') ?? 1).clamp(1, 20);
+          final text = cell.text.replaceAll(RegExp(r'\s+'), ' ').trim();
+          for (var k = 0; k < span; k++) {
+            cells.add(k == 0 ? text : '');
+          }
+        }
         if (cells.isNotEmpty) rawRows.add(cells);
       }
       if (rawRows.length < 2) continue;

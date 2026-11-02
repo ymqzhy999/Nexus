@@ -6,7 +6,17 @@ Nexus 是 Flutter 移动端应用（Android 优先），本地优先：采集内
 
 ---
 
-## 已实现（v0.2）
+## 已实现（v0.3）
+
+### 数据实验室（v0.3）
+
+- **政府/权威数据**：世界银行 API（GDP/CPI/人口/失业/研发/债务等，按国家+年份）；国家统计局、财政部、海关总署、央行、人社部、教育部、科技部、IMF/OECD/Eurostat/FRED/UN Data/Data.gov 入口
+- **省份统计年鉴**：31 个省级统计局 + 国家统计局/中国统计年鉴，内置浏览器可直接打开；点「抓表格」由 WebView 注入 JS 抓取页面表格
+- **通用导入**：网页 HTML 表格、CSV、JSON、XLSX；自动识别表格、表头、列类型、年份列
+- **分析**：描述统计（均值/中位数/方差/标准差/CV/分位/偏度/峰度）、趋势（累计变化/CAGR/同比/斜率/R²/倍增时间）、关系（Pearson/协方差/OLS/弹性）、数字经济理论（摩尔、梅特卡夫、数字经济占比、索洛 TFP、Cobb-Douglas、HHI、基尼）
+- **公式本地化**：所有公式由 Dart 实现并单测；AI 只能从固定指标库里选指标、解释本地算出的数值，禁止生成公式或数字
+- **导出**：Excel（.xlsx）、PDF（内置中文字体）、CSV，通过系统分享保存
+- 数据集、指标结果、AI 解读保存在本地 SQLite，永久保留
 
 ### 精选来源库 + 关键词采集
 
@@ -86,7 +96,7 @@ Drift + SQLite + FTS5（trigram，中文可搜）：
 
 1. push 到 `main` 触发 `.github/workflows/build.yml`
 2. 构建 `flutter build apk --release`
-3. 自动发布到 Release：`Nexus.apk`（tag `v0.2.0`）
+3. 自动发布到 Release：`Nexus.apk`（tag `v0.3.1`）
 
 本地构建：
 
@@ -114,11 +124,13 @@ Android 工程由 CI 用 `flutter create --platforms=android .` 生成，再由 
 ```
 lib/
   ai/            DeepSeek 客户端、分析编排
-  catalog/       60 个内置精选来源目录
+  catalog/       60 个精选来源 + 政府数据源 + 31 省年鉴
+  analysis/      统计/计量指标库（固定公式）
+  export/        Excel / PDF / CSV 导出
   core/          主题、组件、模型、设置、工具
   crawl/         HTTP、提取器、统一引擎
-  data/          Drift 数据库、Repository
-  features/      feed / discover / catalog / library / settings / document / reader
+  data/          Drift 数据库、Repository、表格解析、世界银行
+  features/      feed / discover / catalog / data lab / library / settings / document / reader
   state/         Riverpod providers 与控制器
 ```
 
@@ -132,6 +144,11 @@ lib/
 - 定时后台刷新 v0.2 再上：Workmanager 0.9 系列插件在 Flutter 3.35 下互相不兼容（已在本机 CI 复现），v0.1 先移除；信息流下拉刷新、来源「刷新全部」可用。
 - 云端 Python 引擎（Scrapy / Playwright / Trafilatura / FastAPI）为下一阶段，共用同一份数据契约。
 - 计划：多设备同步（SyncOutbox 已预留）、集合/标签管理、更多插件、i18n。
+
+## 签名与升级
+
+v0.3.1 起使用仓库内的固定签名（`tool/nexus-release.p12`，个人 sideload 用途），后续版本可直接覆盖升级并保留本地数据。
+v0.1/v0.2 使用临时调试签名，无法覆盖安装；首次装 v0.3.1 需要卸载旧版（旧数据会清空）。
 
 ## 隐私
 
