@@ -58,7 +58,7 @@ class DataLabPage extends ConsumerWidget {
                   icon: Icons.account_balance_outlined,
                   color: NColors.amber,
                   title: '省份年鉴',
-                  subtitle: '31 个省级统计局 + 抓表格',
+                  subtitle: '31 省年鉴 + 数据开放平台',
                   onTap: () => context.push('/provinces'),
                 ),
                 _ActionTile(
@@ -72,18 +72,18 @@ class DataLabPage extends ConsumerWidget {
             ),
             const SizedBox(height: 22),
             SectionHeader(
-              kicker: 'AUTHORITATIVE SOURCES',
-              title: '权威数据入口',
-              trailing: MonoLabel('${govPortals.length} SITES'),
+              kicker: 'DATA PORTALS',
+              title: '数据开放 / 年鉴入口',
+              trailing: MonoLabel('${dataCenters.length} 个'),
             ),
             SizedBox(
               height: 92,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: govPortals.length,
+                itemCount: dataCenters.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, i) {
-                  final p = govPortals[i];
+                  final p = dataCenters[i];
                   return GestureDetector(
                     onTap: () => context.push(
                       '/data-browser?url=${Uri.encodeComponent(p.url)}&title=${Uri.encodeComponent(p.name)}',
@@ -102,9 +102,10 @@ class DataLabPage extends ConsumerWidget {
                           Text(p.name, maxLines: 1, overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 3),
-                          Text(p.category, style: kMono.copyWith(fontSize: 8, color: NColors.violet)),
+                          Text('OPEN DATA', style: kMono.copyWith(fontSize: 8, color: NColors.lime)),
                           const Spacer(),
-                          Text(p.description, maxLines: 2, overflow: TextOverflow.ellipsis,
+                          Text('省级/国家开放数据平台，直接打开', maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 9.5, color: NColors.muted, height: 1.4)),
                         ],
                       ),
@@ -275,7 +276,7 @@ class _WorldBankSheetState extends ConsumerState<_WorldBankSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
+      padding: EdgeInsets.fromLTRB(18, 14, 18, MediaQuery.viewPaddingOf(context).bottom + 18),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -401,7 +402,7 @@ class _ImportSheetState extends ConsumerState<_ImportSheet> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(18, 14, 18, 18 + MediaQuery.viewInsetsOf(context).bottom),
+      padding: EdgeInsets.fromLTRB(18, 14, 18, MediaQuery.viewPaddingOf(context).bottom + 18 + MediaQuery.viewInsetsOf(context).bottom),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -465,9 +466,15 @@ class _ImportSheetState extends ConsumerState<_ImportSheet> {
         parsed = TableParser.parseText(text: res.body, url: url, sourceName: sourceHost(url), contentType: res.contentType);
       }
       if (parsed.tables.isEmpty) throw Exception(parsed.error ?? '没有识别到表格');
-      var table = parsed.tables.first;
-      if (parsed.tables.length > 1) {
-        final chosen = await _pickTable(parsed.tables);
+      final good = parsed.tables.where((t) => !t.looksLikeIndex).toList()
+        ..sort((a, b) => (b.measureColumnCount * 100 + b.rows.length)
+            .compareTo(a.measureColumnCount * 100 + a.rows.length));
+      if (good.isEmpty) {
+        throw Exception('识别到的表格没有可用数值列（可能是年鉴目录/导航表）。请点进具体年份或章节的数据表后再抓。');
+      }
+      var table = good.first;
+      if (good.length > 1) {
+        final chosen = await _pickTable(good);
         if (chosen == null) {
           if (mounted) setState(() => _loading = false);
           return;
@@ -498,7 +505,7 @@ class _ImportSheetState extends ConsumerState<_ImportSheet> {
         minChildSize: 0.4,
         builder: (context, controller) => ListView(
           controller: controller,
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.viewPaddingOf(context).bottom + 16),
           children: [
             const MonoLabel('SELECT TABLE', color: NColors.lime),
             const SizedBox(height: 8),
@@ -520,11 +527,15 @@ class _ImportSheetState extends ConsumerState<_ImportSheet> {
                           Text(tables[i].title, maxLines: 2, overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 3),
-                          Text('${tables[i].rows.length} 行 × ${tables[i].headers.length} 列',
+                          Text('${tables[i].rows.length} 行 × ${tables[i].headers.length} 列 · ${tables[i].measureColumnCount} 个数值列',
                               style: kMono.copyWith(fontSize: 8.5)),
                           const SizedBox(height: 2),
-                          Text(tables[i].headers.take(5).join(' · '), maxLines: 1,
+                          Text(tables[i].headers.take(6).join(' · '), maxLines: 1,
                               overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: NColors.muted)),
+                          const SizedBox(height: 2),
+                          Text(tables[i].rows.take(2).map((r) => r.take(4).join(' | ')).join('  //  '),
+                              maxLines: 1, overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 8, color: NColors.muted)),
                         ],
                       ),
                     ),

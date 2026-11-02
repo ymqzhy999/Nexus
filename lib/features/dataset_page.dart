@@ -241,7 +241,7 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
       ),
       body: NexusBackground(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 40),
+          padding: EdgeInsets.fromLTRB(16, 4, 16, MediaQuery.paddingOf(context).bottom + 90),
           children: [
             Row(
               children: [
@@ -297,6 +297,25 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
               _aiCard(),
             ],
             const SizedBox(height: 18),
+            if (_valueCol == null)
+              GlassCard(
+                accent: NColors.amber,
+                padding: const EdgeInsets.all(14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.warning_amber_rounded, size: 16, color: NColors.amber),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: Text(
+                        '没有识别到可分析的数值列。这通常是年鉴的“目录/年份导航表”，不是数据表。请回到网页点进具体年份或章节的表格再抓；也可以在下方「数值列」里手动指定。',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.6),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (_valueCol == null) const SizedBox(height: 12),
             SectionHeader(
               kicker: 'COMPUTED METRICS',
               title: '本地计算结果',
@@ -309,15 +328,33 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
                 subtitle: '检查数值列是否识别正确，或换一列。',
               )
             else
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 1.75,
-                children: [for (final m in _metrics) _metricCard(m)],
-              ),
+              for (final group in MetricGroup.values)
+                if (_metrics.any((m) => m.group == group)) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 7, top: 2),
+                    child: Row(
+                      children: [
+                        Container(width: 3, height: 12, color: _metricColor(group)),
+                        const SizedBox(width: 6),
+                        Text(group.label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                        const Spacer(),
+                        MonoLabel('${_metrics.where((m) => m.group == group).length}'),
+                      ],
+                    ),
+                  ),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 1.75,
+                    children: [
+                      for (final m in _metrics.where((m) => m.group == group)) _metricCard(m),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ],
             const SizedBox(height: 20),
             SectionHeader(kicker: 'PREVIEW', title: '数据预览', trailing: MonoLabel('前 10 行')),
             GlassCard(
@@ -690,10 +727,10 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
   Future<void> _exportExcel() async {
     setState(() => _exportBusy = true);
     try {
-      final f = await DatasetExporter.excel(_filtered, _metrics, _aiText);
-      await DatasetExporter.share(f, text: '${_filtered.title} · Nexus 数据导出');
+      final path = await DatasetExporter.saveExcel(_filtered, _metrics, _aiText);
+      _snack('Excel 已保存：$path');
     } catch (e) {
-      _snack('导出失败：$e');
+      _snack('Excel 导出失败：$e');
     } finally {
       if (mounted) setState(() => _exportBusy = false);
     }
@@ -702,8 +739,8 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
   Future<void> _exportPdf() async {
     setState(() => _exportBusy = true);
     try {
-      final f = await DatasetExporter.pdf(_filtered, _metrics, _aiText);
-      await DatasetExporter.share(f, text: '${_filtered.title} · Nexus 数据报告');
+      final path = await DatasetExporter.savePdf(_filtered, _metrics, _aiText);
+      _snack('PDF 已保存：$path');
     } catch (e) {
       _snack('PDF 导出失败：$e');
     } finally {
@@ -714,10 +751,10 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
   Future<void> _exportCsv() async {
     setState(() => _exportBusy = true);
     try {
-      final f = await DatasetExporter.csv(_filtered);
-      await DatasetExporter.share(f, text: '${_filtered.title} · CSV');
+      final path = await DatasetExporter.saveCsv(_filtered);
+      _snack('CSV 已保存：$path');
     } catch (e) {
-      _snack('导出失败：$e');
+      _snack('CSV 导出失败：$e');
     } finally {
       if (mounted) setState(() => _exportBusy = false);
     }

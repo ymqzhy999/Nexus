@@ -50,35 +50,36 @@ const List<WbCountry> wbCountries = [
 class ProvinceSource {
   final String name;
   final String url;
+  final bool yearbook;
 
-  const ProvinceSource(this.name, this.url);
+  const ProvinceSource(this.name, this.url, {this.yearbook = false});
 }
 
 const List<ProvinceSource> provinceSources = [
-  ProvinceSource('国家统计局', 'https://data.stats.gov.cn/'),
-  ProvinceSource('中国统计年鉴', 'https://www.stats.gov.cn/sj/ndsj/'),
+  ProvinceSource('国家统计局', 'https://data.stats.gov.cn/', yearbook: true),
+  ProvinceSource('中国统计年鉴', 'https://www.stats.gov.cn/sj/ndsj/', yearbook: true),
   ProvinceSource('北京', 'https://tjj.beijing.gov.cn/'),
-  ProvinceSource('天津', 'https://stats.tj.gov.cn/'),
+  ProvinceSource('天津', 'https://stats.tj.gov.cn/tjsj_52032/tjnj/', yearbook: true),
   ProvinceSource('河北', 'https://tjj.hebei.gov.cn/'),
-  ProvinceSource('山西', 'https://tjj.shanxi.gov.cn/'),
-  ProvinceSource('内蒙古', 'https://tj.nmg.gov.cn/'),
-  ProvinceSource('辽宁', 'https://tjj.ln.gov.cn/'),
-  ProvinceSource('吉林', 'https://tjj.jl.gov.cn/'),
+  ProvinceSource('山西', 'https://tjj.shanxi.gov.cn/tjsj/tjnj/', yearbook: true),
+  ProvinceSource('内蒙古', 'https://tj.nmg.gov.cn/tjyw/tjnj/', yearbook: true),
+  ProvinceSource('辽宁', 'https://tjj.ln.gov.cn/tjsj/tjnj/', yearbook: true),
+  ProvinceSource('吉林', 'https://tjj.jl.gov.cn/tjsj/tjnj/', yearbook: true),
   ProvinceSource('黑龙江', 'https://tjj.hlj.gov.cn/'),
-  ProvinceSource('上海', 'https://tjj.sh.gov.cn/'),
+  ProvinceSource('上海', 'https://tjj.sh.gov.cn/tjnj/', yearbook: true),
   ProvinceSource('江苏', 'https://tj.jiangsu.gov.cn/'),
-  ProvinceSource('浙江', 'https://tjj.zj.gov.cn/'),
-  ProvinceSource('安徽', 'https://tjj.ah.gov.cn/'),
+  ProvinceSource('浙江', 'https://tjj.zj.gov.cn/col/col1525563/index.html', yearbook: true),
+  ProvinceSource('安徽', 'https://tjj.ah.gov.cn/ssah/qwfbjd/tjnj/index.html', yearbook: true),
   ProvinceSource('福建', 'https://tjj.fujian.gov.cn/'),
-  ProvinceSource('江西', 'https://tjj.jiangxi.gov.cn/'),
+  ProvinceSource('江西', 'https://tjj.jiangxi.gov.cn/col/col38595/index.html', yearbook: true),
   ProvinceSource('山东', 'https://tjj.shandong.gov.cn/'),
-  ProvinceSource('河南', 'https://tjj.henan.gov.cn/'),
+  ProvinceSource('河南', 'https://tjj.henan.gov.cn/tjfw/tjcbw/tjnj/', yearbook: true),
   ProvinceSource('湖北', 'https://tjj.hubei.gov.cn/'),
-  ProvinceSource('湖南', 'https://tjj.hunan.gov.cn/'),
-  ProvinceSource('广东', 'https://stats.gd.gov.cn/'),
-  ProvinceSource('广西', 'http://tjj.gxzf.gov.cn/'),
-  ProvinceSource('海南', 'https://stats.hainan.gov.cn/'),
-  ProvinceSource('重庆', 'https://tjj.cq.gov.cn/'),
+  ProvinceSource('湖南', 'https://tjj.hunan.gov.cn/hntj/tjsj/tjnj/', yearbook: true),
+  ProvinceSource('广东', 'https://stats.gd.gov.cn/gdtjnj/', yearbook: true),
+  ProvinceSource('广西', 'http://tjj.gxzf.gov.cn/tjsj/tjnj/', yearbook: true),
+  ProvinceSource('海南', 'https://stats.hainan.gov.cn/tjj/tjsj/tjnj/', yearbook: true),
+  ProvinceSource('重庆', 'https://tjj.cq.gov.cn/zwgk_233/tjnj/', yearbook: true),
   ProvinceSource('四川', 'https://tjj.sc.gov.cn/'),
   ProvinceSource('贵州', 'https://stjj.guizhou.gov.cn/'),
   ProvinceSource('云南', 'https://stats.yn.gov.cn/'),
@@ -88,6 +89,26 @@ const List<ProvinceSource> provinceSources = [
   ProvinceSource('青海', 'https://tjj.qinghai.gov.cn/'),
   ProvinceSource('宁夏', 'https://tj.nx.gov.cn/'),
   ProvinceSource('新疆', 'https://tjj.xinjiang.gov.cn/'),
+];
+
+class DataCenter {
+  final String name;
+  final String url;
+
+  const DataCenter(this.name, this.url);
+}
+
+const List<DataCenter> dataCenters = [
+  DataCenter('国家数据', 'https://data.stats.gov.cn/'),
+  DataCenter('中国统计年鉴', 'https://www.stats.gov.cn/sj/ndsj/'),
+  DataCenter('北京公共数据', 'https://data.beijing.gov.cn/'),
+  DataCenter('上海公共数据', 'https://data.sh.gov.cn/'),
+  DataCenter('浙江公共数据', 'https://data.zj.gov.cn/'),
+  DataCenter('广东公共数据', 'https://gddata.gd.gov.cn/'),
+  DataCenter('山东公共数据', 'http://data.sd.gov.cn/'),
+  DataCenter('福建公共数据', 'https://data.fujian.gov.cn/'),
+  DataCenter('贵州公共数据', 'https://data.guizhou.gov.cn/'),
+  DataCenter('深圳开放数据', 'https://opendata.sz.gov.cn/'),
 ];
 
 class GovPortal {

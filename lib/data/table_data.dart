@@ -82,11 +82,28 @@ class TableData {
     return null;
   }
 
+  bool isYearLikeColumn(int i) {
+    if (i < 0 || i >= headers.length) return false;
+    final h = headers[i].toLowerCase().trim();
+    if (h.contains('年份') || h.contains('年度') || h.contains('year') || h == '年' || h.contains('date') || h.contains('时间')) {
+      return true;
+    }
+    var hits = 0;
+    var total = 0;
+    for (final r in rows) {
+      if (i >= r.length) continue;
+      final text = r[i].trim();
+      if (text.isEmpty) continue;
+      total++;
+      if (yearOf(text) != null) hits++;
+    }
+    return total >= 2 && hits / total >= 0.7;
+  }
+
   List<int> numericColumns() {
-    final year = yearColumn();
     final out = <int>[];
     for (var i = 0; i < headers.length; i++) {
-      if (i == year) continue;
+      if (isYearLikeColumn(i)) continue;
       var hits = 0;
       var total = 0;
       for (final r in rows) {
@@ -100,6 +117,10 @@ class TableData {
     }
     return out;
   }
+
+  int get measureColumnCount => numericColumns().length;
+
+  bool get looksLikeIndex => rows.length < 3 || measureColumnCount == 0;
 
   List<double?> numericSeries(int column, {int? yearColumnIndex, int? startYear, int? endYear}) {
     final years = yearColumnIndex ?? yearColumn();

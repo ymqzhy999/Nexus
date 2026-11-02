@@ -23,13 +23,6 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   final _keyword = TextEditingController();
   SourceKind _mode = SourceKind.auto;
 
-  static const _presets = [
-    ('Hacker News', 'https://hnrss.org/frontpage', Icons.terminal),
-    ('阮一峰周刊', 'https://www.ruanyifeng.com/blog/atom.xml', Icons.code),
-    ('少数派', 'https://sspai.com/feed', Icons.apple),
-    ('V2EX', 'https://www.v2ex.com/index.xml', Icons.forum_outlined),
-  ];
-
   @override
   void dispose() {
     _controller.dispose();
@@ -208,38 +201,6 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                   ],
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            const MonoLabel('QUICK START'),
-            const SizedBox(height: 9),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final p in _presets)
-                  GestureDetector(
-                    onTap: () {
-                      _controller.text = p.$2;
-                      _controller.selection = TextSelection.collapsed(offset: p.$2.length);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.03),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.07)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(p.$3, size: 13, color: NColors.violet),
-                          const SizedBox(width: 6),
-                          Text(p.$1, style: const TextStyle(fontSize: 11, color: NColors.text)),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
             ),
             const SizedBox(height: 26),
             SectionHeader(

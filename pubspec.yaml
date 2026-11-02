@@ -1,7 +1,7 @@
 name: nexus
 description: "Nexus — Local-first AI intelligence hub."
 publish_to: "none"
-version: 0.3.1+4
+version: 0.3.2+5
 
 environment:
   sdk: ">=3.5.0 <4.0.0"
@@ -25,9 +25,8 @@ dependencies:
   webview_flutter: ^4.9.0
   excel: ^4.0.6
   pdf: ^3.11.1
-  share_plus: ^10.1.4
   csv: ^6.0.0
-  cross_file: ^0.3.4+2
+  file_saver: 0.2.14
 
 dev_dependencies:
   flutter_test:
