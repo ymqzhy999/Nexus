@@ -38,6 +38,8 @@ class SettingsController extends StateNotifier<AppSettings> {
       proxyUrl: prefs.getString('nexus.proxy_url') ?? '',
       backgroundSync: prefs.getBool('nexus.background_sync') ?? false,
       outputLanguage: prefs.getString('nexus.output_language') ?? '中文',
+      crawlMaxPages: prefs.getInt('nexus.crawl_max_pages') ?? 60,
+      crawlMaxDepth: prefs.getInt('nexus.crawl_max_depth') ?? 3,
     );
     return SettingsController(prefs: prefs, secure: secure, initial: settings);
   }
@@ -99,6 +101,16 @@ class SettingsController extends StateNotifier<AppSettings> {
   Future<void> setOutputLanguage(String value) async {
     state = state.copyWith(outputLanguage: value);
     await prefs.setString('nexus.output_language', value);
+  }
+
+  Future<void> setCrawlMaxPages(int value) async {
+    state = state.copyWith(crawlMaxPages: value);
+    await prefs.setInt('nexus.crawl_max_pages', value);
+  }
+
+  Future<void> setCrawlMaxDepth(int value) async {
+    state = state.copyWith(crawlMaxDepth: value);
+    await prefs.setInt('nexus.crawl_max_depth', value);
   }
 }
 

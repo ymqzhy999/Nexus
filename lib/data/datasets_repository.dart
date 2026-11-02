@@ -42,7 +42,14 @@ class DatasetsRepository {
   }
 
   Future<void> deleteDataset(int id) async {
+    await (db.delete(db.dataAnalyses)..where((t) => t.datasetId.equals(id))).go();
     await (db.delete(db.datasets)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<void> deleteDatasets(Iterable<int> ids) async {
+    for (final id in ids) {
+      await deleteDataset(id);
+    }
   }
 
   Future<DataAnalysis?> latestAnalysis(int datasetId) {

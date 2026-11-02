@@ -65,7 +65,7 @@ class TableData {
   int? yearColumn() {
     for (var i = 0; i < headers.length; i++) {
       final h = headers[i].toLowerCase();
-      if (h.contains('年份') || h.contains('年度') || h.contains('year') || h == '年' || h.contains('date') || h.contains('时间')) {
+      if (h.contains('年份') || h.contains('年度') || h.contains('year') || h == '年' || h == '年度' || h.contains('date') || h.contains('时间')) {
         return i;
       }
     }
@@ -85,7 +85,7 @@ class TableData {
   bool isYearLikeColumn(int i) {
     if (i < 0 || i >= headers.length) return false;
     final h = headers[i].toLowerCase().trim();
-    if (h.contains('年份') || h.contains('年度') || h.contains('year') || h == '年' || h.contains('date') || h.contains('时间')) {
+    if (h.contains('年份') || h.contains('年度') || h.contains('year') || h == '年' || h == '年度' || h.contains('date') || h.contains('时间')) {
       return true;
     }
     var hits = 0;

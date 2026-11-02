@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,9 +12,11 @@ import '../core/settings.dart';
 import '../core/utils.dart';
 import '../catalog/catalog.dart';
 import '../crawl/engine.dart';
+import '../crawler/site_crawler.dart';
 import '../crawl/http_client.dart';
 import '../data/database.dart';
 import '../data/datasets_repository.dart';
+import 'crawl_controller.dart';
 import '../data/repository.dart';
 
 final dbProvider = Provider<AppDatabase>((ref) {
@@ -91,6 +94,20 @@ final datasetProvider = FutureProvider.family<Dataset?, int>((ref, id) {
 
 final datasetAnalysisProvider = FutureProvider.family<DataAnalysis?, int>((ref, id) {
   return ref.watch(datasetsRepositoryProvider).latestAnalysis(id);
+});
+
+final crawlJobsProvider = StreamProvider<List<CrawlJob>>((ref) {
+  final q = ref.watch(dbProvider).select(ref.watch(dbProvider).crawlJobs)
+    ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+  return q.watch();
+});
+
+final crawlControllerProvider = StateNotifierProvider<CrawlController, CrawlState>((ref) {
+  return CrawlController(
+    db: ref.watch(dbProvider),
+    datasets: ref.watch(datasetsRepositoryProvider),
+    crawler: SiteCrawler(ref.watch(httpFetcherProvider)),
+  );
 });
 
 class AiQueueState {

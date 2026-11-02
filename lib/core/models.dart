@@ -150,6 +150,8 @@ class AppSettings {
   final String proxyUrl;
   final bool backgroundSync;
   final String outputLanguage;
+  final int crawlMaxPages;
+  final int crawlMaxDepth;
 
   const AppSettings({
     this.apiKey = '',
@@ -162,6 +164,8 @@ class AppSettings {
     this.proxyUrl = '',
     this.backgroundSync = false,
     this.outputLanguage = '中文',
+    this.crawlMaxPages = 60,
+    this.crawlMaxDepth = 3,
   });
 
   bool get hasKey => apiKey.trim().isNotEmpty;
@@ -177,6 +181,8 @@ class AppSettings {
     String? proxyUrl,
     bool? backgroundSync,
     String? outputLanguage,
+    int? crawlMaxPages,
+    int? crawlMaxDepth,
   }) =>
       AppSettings(
         apiKey: apiKey ?? this.apiKey,
@@ -189,6 +195,8 @@ class AppSettings {
         proxyUrl: proxyUrl ?? this.proxyUrl,
         backgroundSync: backgroundSync ?? this.backgroundSync,
         outputLanguage: outputLanguage ?? this.outputLanguage,
+        crawlMaxPages: crawlMaxPages ?? this.crawlMaxPages,
+        crawlMaxDepth: crawlMaxDepth ?? this.crawlMaxDepth,
       );
 }
 

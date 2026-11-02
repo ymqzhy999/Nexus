@@ -3,86 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/theme.dart';
-import 'features/ask_page.dart';
-import 'features/catalog_page.dart';
-import 'features/discover_page.dart';
-import 'features/data_browser_page.dart';
-import 'features/data_lab_page.dart';
-import 'features/dataset_page.dart';
-import 'features/document_page.dart';
-import 'features/feed_page.dart';
-import 'features/library_page.dart';
-import 'features/province_page.dart';
-import 'features/reader_page.dart';
-import 'features/settings_page.dart';
-import 'features/theory_page.dart';
+import 'features/crawl_page.dart';
+import 'features/crawler_settings_page.dart';
+import 'features/datasets_page.dart';
+import 'features/simple_dataset_page.dart';
+import 'features/sites_page.dart';
 import 'features/shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/feed',
+    initialLocation: '/crawl',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(routes: [
-            GoRoute(path: '/feed', builder: (context, state) => const FeedPage()),
+            GoRoute(path: '/crawl', builder: (context, state) => const CrawlPage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/discover', builder: (context, state) => const DiscoverPage()),
+            GoRoute(path: '/datasets', builder: (context, state) => const DatasetsPage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/library', builder: (context, state) => const LibraryPage()),
+            GoRoute(path: '/sites', builder: (context, state) => const SitesPage()),
           ]),
           StatefulShellBranch(routes: [
-            GoRoute(path: '/data', builder: (context, state) => const DataLabPage()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/settings', builder: (context, state) => const SettingsPage()),
+            GoRoute(path: '/settings', builder: (context, state) => const CrawlerSettingsPage()),
           ]),
         ],
       ),
       GoRoute(
         path: '/dataset/:id',
-        builder: (context, state) => DatasetPage(
+        builder: (context, state) => SimpleDatasetPage(
           datasetId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
         ),
       ),
       GoRoute(
-        path: '/provinces',
-        builder: (context, state) => const ProvincePage(),
-      ),
-      GoRoute(
-        path: '/theory',
-        builder: (context, state) => const TheoryPage(),
-      ),
-      GoRoute(
-        path: '/data-browser',
-        builder: (context, state) => DataBrowserPage(
-          url: state.uri.queryParameters['url'] ?? '',
-          title: state.uri.queryParameters['title'] ?? '数据浏览',
-        ),
-      ),
-      GoRoute(
-        path: '/ask',
-        builder: (context, state) => const AskPage(),
-      ),
-      GoRoute(
-        path: '/catalog',
-        builder: (context, state) => const CatalogPage(),
-      ),
-      GoRoute(
-        path: '/doc/:id',
-        builder: (context, state) => DocumentPage(
-          documentId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
-        ),
-      ),
-      GoRoute(
-        path: '/reader',
-        builder: (context, state) => ReaderPage(
-          url: state.uri.queryParameters['url'] ?? '',
-          title: state.uri.queryParameters['title'] ?? '',
-        ),
+        path: '/crawler-settings',
+        builder: (context, state) => const CrawlerSettingsPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -101,7 +58,7 @@ class NexusApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
-      title: 'Nexus',
+      title: 'Nexus Crawler',
       debugShowCheckedModeBanner: false,
       theme: buildNexusTheme(),
       routerConfig: router,

@@ -10,6 +10,21 @@ import '../core/models.dart';
 part 'database.g.dart';
 
 
+
+class CrawlJobs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get keyword => text()();
+  TextColumn get seedsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get status => text().withDefault(const Constant('running'))();
+  IntColumn get pages => integer().withDefault(const Constant(0))();
+  IntColumn get tablesFound => integer().withDefault(const Constant(0))();
+  IntColumn get datasetsSaved => integer().withDefault(const Constant(0))();
+  TextColumn get errorsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get configJson => text().withDefault(const Constant('{}'))();
+  DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
+  DateTimeColumn get finishedAt => dateTime().nullable()();
+}
+
 class Datasets extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -206,12 +221,13 @@ class SettingsEntries extends Table {
   SettingsEntries,
   Datasets,
   DataAnalyses,
+  CrawlJobs,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -227,6 +243,9 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(datasets);
             await m.createTable(dataAnalyses);
           }
+          if (from < 3) {
+            await m.createTable(crawlJobs);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
@@ -241,6 +260,7 @@ class AppDatabase extends _$AppDatabase {
     'CREATE INDEX IF NOT EXISTS idx_ai_document ON ai_analysis(document_id)',
     'CREATE INDEX IF NOT EXISTS idx_datasets_created ON datasets(created_at DESC)',
     'CREATE INDEX IF NOT EXISTS idx_data_analyses_dataset ON data_analyses(dataset_id)',
+    'CREATE INDEX IF NOT EXISTS idx_crawl_jobs_created ON crawl_jobs(created_at DESC)',
   ];
 
   Future<void> _createSearchIndex() async {
@@ -354,6 +374,7 @@ class AppDatabase extends _$AppDatabase {
   Future<void> wipeAll() async {
     await transaction(() async {
       for (final name in const [
+        'crawl_jobs',
         'data_analyses',
         'datasets',
         'document_tags',

@@ -11,10 +11,9 @@ class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
 
   static const _items = [
-    (Icons.radar, '信息流'),
-    (Icons.explore_outlined, '发现'),
-    (Icons.hub_outlined, '知识库'),
-    (Icons.science_outlined, '数据'),
+    (Icons.radar, '采集'),
+    (Icons.table_chart_outlined, '数据集'),
+    (Icons.public, '站点'),
     (Icons.tune, '设置'),
   ];
 
@@ -62,12 +61,7 @@ class MainShell extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 9),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(17),
-                          gradient: active
-                              ? LinearGradient(colors: [
-                                  NColors.cyan.withValues(alpha: 0.16),
-                                  NColors.violet.withValues(alpha: 0.1),
-                                ])
-                              : null,
+                          color: active ? NColors.cyan.withValues(alpha: 0.1) : null,
                           border: active
                               ? Border.all(color: NColors.cyan.withValues(alpha: 0.22))
                               : null,
@@ -84,8 +78,8 @@ class MainShell extends StatelessWidget {
                             Text(
                               item.$2,
                               style: TextStyle(
-                                fontSize: 9.5,
-                                letterSpacing: 0.4,
+                                fontSize: 10,
+                                letterSpacing: 0.2,
                                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                                 color: active ? NColors.cyan : NColors.muted,
                               ),

@@ -53,11 +53,16 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.3.3
-          name: Nexus v0.3.3 — Data Lab
+          tag_name: v0.4.0
+          name: Nexus v0.4.0 — Crawler
           body: |
-            Nexus — Local-first AI intelligence hub (Android).
-            Download `Nexus.apk` below and install it on your phone.
-            Configure your DeepSeek API key in Settings.
+            Nexus v0.4.0 — 统计年鉴爬虫
+            关键词 → 站点 → 全站抓表；不再需要 URL。
+            - 站点库：国家统计局/中国统计年鉴/省份年鉴/数据开放平台
+            - 站内 BFS 抓取：HTML 表格、XLSX、CSV、frame 链接
+            - 宽表转长表、目录表过滤、关键词/年份过滤
+            - 数据集预览 + Excel/PDF/CSV 导出到下载目录
+            - 数据集/任务批量删除
+            AI 仅用于可选「选站点」，不参与数据计算。
           files: Nexus.apk
           make_latest: true

@@ -261,6 +261,24 @@ $clipped
     return c.content.trim();
   }
 
+  Future<Map<String, dynamic>> suggestStatSites({
+    required String keyword,
+    required List<Map<String, String>> catalog,
+    String language = '中文',
+  }) async {
+    final c = await _completeJson(
+      system: '你是统计年鉴与政府数据检索助手。只能从给定站点目录中选择 id，绝不能编造网址。'
+          '只输出 JSON。',
+      user: '关键词：$keyword\n\n站点目录（id | 名称 | 类别 | 描述）：\n'
+          '${catalog.map((e) => '${e['id']} | ${e['name']} | ${e['category']} | ${e['description']}').join('\n')}\n\n'
+          '请选择最多 8 个最可能包含该关键词统计数据的站点，返回：\n'
+          '{"sites":[{"id":"目录里的 id","reason":"为什么可能有数据，30 字内"}],"note":"整体判断"}\n'
+          '不要选择明显无关的站点；所有说明使用$language。',
+      maxTokens: 900,
+    );
+    return c.json;
+  }
+
   String _analysisSystem(String language) => '''
 你是 Nexus 情报分析引擎，任务是把网页内容压缩成高密度、可检索、可排序的结构化情报。
 只输出合法 JSON，不要输出 Markdown 代码块，不要输出解释。
