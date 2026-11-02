@@ -5,7 +5,6 @@ import '../core/models.dart';
 import '../core/settings.dart';
 import '../core/theme.dart';
 import '../core/widgets.dart';
-import '../services/background.dart';
 import '../state/providers.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
@@ -214,34 +213,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(height: 8),
                 Text(
                   '提示：DeepSeek 与多数海外站点在开启系统 VPN 后即可直连。抓取失败会显示 DNS / 403 / 超时等具体原因。',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5, height: 1.6),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _Section(
-              kicker: 'BACKGROUND',
-              title: '后台采集',
-              icon: Icons.sync,
-              accent: NColors.amber,
-              children: [
-                _ToggleRow(
-                  title: '定时刷新来源',
-                  subtitle: '约 30 分钟一次，受 Android 省电策略影响可能延后',
-                  value: s.backgroundSync,
-                  onChanged: (v) async {
-                    await ref.read(settingsControllerProvider.notifier).setBackgroundSync(v);
-                    try {
-                      await BackgroundSync.configure(v);
-                      _snack(v ? '后台任务已注册' : '后台任务已取消');
-                    } catch (e) {
-                      _snack('后台任务设置失败：$e');
-                    }
-                  },
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '后台只刷新来源，不自动调用 AI，避免在不知情时消耗 Token。',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5, height: 1.6),
                 ),
               ],

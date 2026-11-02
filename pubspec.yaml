@@ -23,12 +23,6 @@ dependencies:
   crypto: ^3.0.5
   url_launcher: ^6.3.0
   webview_flutter: ^4.9.0
-  workmanager: ^0.9.0
-
-dependency_overrides:
-  # workmanager 0.9.4's Apple/Android implementations lag the platform
-  # interface by one named parameter; pin to the matching 0.9.1 API.
-  workmanager_platform_interface: 0.9.1
 
 dev_dependencies:
   flutter_test:

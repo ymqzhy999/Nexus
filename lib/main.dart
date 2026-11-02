@@ -5,7 +5,6 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 import 'app.dart';
 import 'core/settings.dart';
-import 'services/background.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +17,6 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
   final settings = await SettingsController.load();
-  try {
-    await BackgroundSync.configure(settings.state.backgroundSync);
-  } catch (_) {}
   runApp(
     ProviderScope(
       overrides: [settingsControllerProvider.overrideWith((ref) => settings)],

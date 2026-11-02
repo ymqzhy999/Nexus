@@ -108,7 +108,6 @@ lib/
   crawl/         HTTP、提取器、统一引擎
   data/          Drift 数据库、Repository
   features/      feed / discover / library / settings / document / reader
-  services/      Workmanager 后台刷新
   state/         Riverpod providers 与控制器
 ```
 
@@ -119,7 +118,7 @@ lib/
 ## 边界与路线图
 
 - 手机端不承诺抓取所有网站：动态渲染、登录、强风控站点会失败并给出原因。
-- 后台刷新受 Android Doze 影响，约 30 分钟一次且可能延后；后台不自动调用 AI，避免意外扣费。
+- 定时后台刷新 v0.2 再上：Workmanager 0.9 系列插件在 Flutter 3.35 下互相不兼容（已在本机 CI 复现），v0.1 先移除；信息流下拉刷新、来源「刷新全部」可用。
 - 云端 Python 引擎（Scrapy / Playwright / Trafilatura / FastAPI）为下一阶段，共用同一份数据契约。
 - 计划：多设备同步（SyncOutbox 已预留）、集合/标签管理、更多插件、i18n。
 
