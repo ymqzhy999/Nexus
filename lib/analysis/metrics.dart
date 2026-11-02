@@ -242,12 +242,23 @@ class StatsEngine {
     final out = <MetricResult>[];
     if (r != null) out.add(_result('pearson', r.toStringAsFixed(3), raw: {'r': r}));
     if (cov != null) out.add(_result('covariance', formatNumber(cov)));
-    final ols = simpleOls(x, y);
-    if (ols != null) {
+    final full = multipleOls(y, x.map((e) => [e]).toList());
+    if (full != null) {
+      final a = full.coefficients[0];
+      final b = full.coefficients[1];
       out.add(_result(
         'ols',
-        'y = ${formatNumber(ols.intercept)} + ${formatNumber(ols.slope)}x · R²=${ols.r2.toStringAsFixed(3)}',
-        raw: {'slope': ols.slope, 'intercept': ols.intercept, 'r2': ols.r2, 'n': n},
+        'y = ${formatNumber(a)} + ${formatNumber(b)}x · R²=${full.r2.toStringAsFixed(3)}',
+        raw: {
+          'intercept': a,
+          'slope': b,
+          'se_intercept': full.standardErrors[0],
+          'se_slope': full.standardErrors[1],
+          't_slope': full.tValues[1],
+          'r2': full.r2,
+          'adj_r2': full.adjustedR2,
+          'n': full.n,
+        },
       ));
     }
     if (x.every((e) => e > 0) && y.every((e) => e > 0)) {

@@ -137,18 +137,55 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
       return null;
     }
 
-    List<double> series(int col) =>
-        t.rows.map((r) => col < r.length ? parseNumeric(r[col]) : null).whereType<double>().toList();
+    int? exact(List<String> names) {
+      for (var i = 0; i < t.headers.length; i++) {
+        final h = t.headers[i].trim().toLowerCase();
+        if (names.contains(h)) return i;
+      }
+      return null;
+    }
+
+    List<List<double>> aligned(List<int> cols) {
+      final result = <List<double>>[];
+      for (final r in t.rows) {
+        final vals = <double>[];
+        var ok = true;
+        for (final c in cols) {
+          if (c >= r.length) {
+            ok = false;
+            break;
+          }
+          final v = parseNumeric(r[c]);
+          if (v == null) {
+            ok = false;
+            break;
+          }
+          vals.add(v);
+        }
+        if (ok) result.add(vals);
+      }
+      return result;
+    }
+
+    List<double> one(int c) => aligned([c]).map((e) => e.first).toList();
 
     final digital = col(['数字经济', '数字产业', 'digital']);
     final gdp = col(['gdp', '国内生产总值']);
     if (digital != null && gdp != null && digital != gdp) {
-      out.addAll(StatsEngine.digitalShare(series(digital), series(gdp)));
+      final pairs = aligned([digital, gdp]);
+      out.addAll(StatsEngine.digitalShare(
+        pairs.map((e) => e[0]).toList(),
+        pairs.map((e) => e[1]).toList(),
+      ));
     }
-    final nodes = col(['节点', '用户数', '用户', 'nodes']);
+    final nodes = col(['节点', '用户数', 'nodes']);
     final value = col(['价值', '收入', '营收', 'value']);
     if (nodes != null && value != null && nodes != value) {
-      out.addAll(StatsEngine.metcalfe(series(nodes), series(value)));
+      final pairs = aligned([nodes, value]);
+      out.addAll(StatsEngine.metcalfe(
+        pairs.map((e) => e[0]).toList(),
+        pairs.map((e) => e[1]).toList(),
+      ));
     }
     if (_yearCol != null && _valueCol != null) {
       final points = t.yearValuePairs(_valueCol!, _yearCol!);
@@ -156,18 +193,19 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
         out.addAll(StatsEngine.moore(points));
       }
     }
-    final y = col(['产出', '总产出', 'gdp', 'output', 'y']);
-    final k = col(['资本', 'capital', 'k']);
-    final l = col(['劳动', '就业', 'labor', 'labour', 'l']);
+    final y = col(['产出', '总产出', 'output']) ?? exact(['y']);
+    final k = col(['资本', 'capital']) ?? exact(['k']);
+    final l = col(['劳动', '就业', 'labor', 'labour']) ?? exact(['l']);
     if (y != null && k != null && l != null) {
-      final ys = series(y);
-      final ks = series(k);
-      final ls = series(l);
+      final rows = aligned([y, k, l]);
+      final ys = rows.map((e) => e[0]).toList();
+      final ks = rows.map((e) => e[1]).toList();
+      final ls = rows.map((e) => e[2]).toList();
       out.addAll(StatsEngine.solowTfp(output: ys, capital: ks, labor: ls));
       out.addAll(StatsEngine.cobbDouglas(output: ys, capital: ks, labor: ls));
     }
-    final share = col(['份额', '占比', 'share']);
-    if (share != null) out.addAll(StatsEngine.hhi(series(share)));
+    final share = col(['份额', 'share']);
+    if (share != null) out.addAll(StatsEngine.hhi(one(share)));
   }
 
   @override
@@ -476,6 +514,17 @@ class _DatasetPageState extends ConsumerState<DatasetPage> {
             Text(m.description, style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.7)),
             const SizedBox(height: 10),
             Text('假设：${m.assumption}', style: kMono.copyWith(fontSize: 8.5, height: 1.6)),
+            if (m.raw.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const MonoLabel('COMPUTATION / DETAIL'),
+              const SizedBox(height: 5),
+              Text(
+                m.raw.entries
+                    .map((e) => '${e.key}: ${e.value is num ? (e.value as num).toStringAsFixed(4) : e.value}')
+                    .join('\n'),
+                style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 8.5, height: 1.6, color: NColors.muted),
+              ),
+            ],
           ],
         ),
       ),
