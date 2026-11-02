@@ -38,7 +38,7 @@ class NexusRepository {
       if (sort == FeedSort.value) (t) => OrderingTerm.desc(t.valueScore),
       (t) => OrderingTerm.desc(t.createdAt),
     ]);
-    q.limit(200);
+    q.limit(500);
     return q.watch();
   }
 
@@ -52,6 +52,9 @@ class NexusRepository {
 
   Future<Source?> findSourceByUrl(String url) =>
       (db.select(db.sources)..where((t) => t.url.equals(url))).getSingleOrNull();
+
+  Future<Source?> findSourceByUrlAndConfig(String url, String config) =>
+      (db.select(db.sources)..where((t) => t.url.equals(url) & t.config.equals(config))).getSingleOrNull();
 
   Future<Document?> getDocument(int id) =>
       (db.select(db.documents)..where((t) => t.id.equals(id))).getSingleOrNull();
@@ -78,13 +81,35 @@ class NexusRepository {
     required String url,
     required String name,
     required SourceKind kind,
+    String config = '{}',
   }) async {
     final id = await db.into(db.sources).insert(SourcesCompanion.insert(
           url: url,
           name: name.isEmpty ? sourceHost(url) : name,
           kind: Value(kind.name),
+          config: Value(config),
         ));
     return (db.select(db.sources)..where((t) => t.id.equals(id))).getSingle();
+  }
+
+  Future<Source> ensureSource({
+    required String url,
+    required String name,
+    required SourceKind kind,
+    String config = '{}',
+  }) async {
+    final existing = await findSourceByUrlAndConfig(url, config);
+    if (existing != null) {
+      await (db.update(db.sources)..where((t) => t.id.equals(existing.id))).write(
+        SourcesCompanion(
+          name: Value(name.isEmpty ? sourceHost(url) : name),
+          kind: Value(kind.name),
+          enabled: const Value(true),
+        ),
+      );
+      return (db.select(db.sources)..where((t) => t.id.equals(existing.id))).getSingle();
+    }
+    return createSource(url: url, name: name, kind: kind, config: config);
   }
 
   Future<SaveOutcome> saveItem({
@@ -311,7 +336,7 @@ class NexusRepository {
     return q.get();
   }
 
-  Future<List<Document>> allDocuments({int limit = 300}) {
+  Future<List<Document>> allDocuments({int limit = 500}) {
     final q = db.select(db.documents)
       ..orderBy([(t) => OrderingTerm.desc(t.createdAt)])
       ..limit(limit);

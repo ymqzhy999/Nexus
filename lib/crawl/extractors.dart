@@ -117,22 +117,35 @@ CrawlOutcome parseJsonFeed(String body, String baseUrl, {int limit = 30}) {
   final items = <CrawlItem>[];
   for (final entry in list.take(limit)) {
     if (entry is! Map) continue;
-    final map = Map<String, dynamic>.from(entry);
-    final title = _pick(map, ['title', 'name', 'headline', 'subject']).trim();
-    final link = _pick(map, ['url', 'link', 'href', 'permalink', 'web_url']).trim();
+    var map = Map<String, dynamic>.from(entry);
+    if (map['data'] is Map) map = Map<String, dynamic>.from(map['data'] as Map);
+    final title = _pick(map, ['title', 'full_name', 'story_title', 'question_title', 'name', 'headline', 'subject']).trim();
+    var link = _pick(map, ['url', 'html_url', 'story_url', 'link', 'href', 'permalink', 'web_url']).trim();
+    if (link.isEmpty) {
+      final oid = _pick(map, ['objectID', 'id']);
+      if (oid.isNotEmpty) link = 'https://news.ycombinator.com/item?id=$oid';
+    }
     if (title.isEmpty && link.isEmpty) continue;
-    final summary = _pick(map, ['summary', 'description', 'excerpt', 'abstract', 'intro']);
-    final content = _pick(map, ['content', 'body', 'text', 'article', 'html']);
-    final published = parseFlexibleDate(
-      _pick(map, ['published_at', 'publishedAt', 'published', 'date', 'created_at', 'pubDate', 'time']),
-    );
-    final image = _pick(map, ['image', 'cover', 'thumbnail', 'image_url', 'featured_image']);
+    final summary = _pick(map, ['summary', 'description', 'excerpt', 'abstract', 'intro', 'selftext']);
+    final content = _pick(map, ['content', 'body', 'text', 'article', 'html', 'story_text', 'comment_text']);
+    final dateRaw = _pick(map, ['published_at', 'publishedAt', 'published', 'date', 'created_at', 'pubDate', 'time', 'created_utc', 'created_at_i', 'creation_date']);
+    final published = parseFlexibleDate(dateRaw) ?? _epochDate(dateRaw);
+    var image = _pick(map, ['image', 'cover', 'thumbnail', 'image_url', 'featured_image', 'cover_image', 'avatar_url']);
+    if (image.isEmpty) {
+      final owner = map['owner'];
+      if (owner is Map) image = (owner['avatar_url'] ?? '').toString();
+    }
+    var author = _pick(map, ['author', 'creator', 'byline', 'by']);
+    final owner = map['owner'];
+    if (author.isEmpty && owner is Map) {
+      author = (owner['login'] ?? owner['display_name'] ?? owner['name'] ?? '').toString();
+    }
     items.add(CrawlItem(
       url: link.isEmpty ? baseUrl : normalizeUrl(link, base: baseUrl),
       title: title.isEmpty ? sourceHost(link) : title,
       content: cleanText(content.isEmpty ? summary : content),
       excerpt: cleanText(summary),
-      author: _pick(map, ['author', 'creator', 'byline']),
+      author: author,
       imageUrl: image,
       publishedAt: published,
       raw: jsonEncode(map),
@@ -270,9 +283,17 @@ String? _firstAttr(XmlElement e, List<String> names, String attr) {
 List<dynamic>? _findList(dynamic data) {
   if (data is List) return data;
   if (data is Map) {
-    for (final key in ['items', 'data', 'articles', 'posts', 'results', 'list', 'entries', 'records']) {
+    for (final key in ['items', 'hits', 'data', 'articles', 'posts', 'results', 'list', 'entries', 'records', 'stories', 'children']) {
       final v = data[key];
-      if (v is List) return v;
+      if (v is List) {
+        if (key == 'children') {
+          return v
+              .whereType<Map>()
+              .map((e) => e['data'] is Map ? e['data'] : e)
+              .toList();
+        }
+        return v;
+      }
       if (v is Map) {
         final nested = _findList(v);
         if (nested != null) return nested;
@@ -280,6 +301,13 @@ List<dynamic>? _findList(dynamic data) {
     }
   }
   return null;
+}
+
+DateTime? _epochDate(String raw) {
+  final v = int.tryParse(raw.trim());
+  if (v == null) return null;
+  if (v > 100000000000) return DateTime.fromMillisecondsSinceEpoch(v);
+  return DateTime.fromMillisecondsSinceEpoch(v * 1000);
 }
 
 String _pick(Map<String, dynamic> map, List<String> keys) {

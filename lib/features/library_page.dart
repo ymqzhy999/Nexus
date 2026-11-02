@@ -57,7 +57,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                         const SizedBox(height: 8),
                         Text('知识库', style: Theme.of(context).textTheme.displaySmall),
                         const SizedBox(height: 4),
-                        Text('全文检索 · 分类分布 · 基于本地语料的 AI 问答', style: Theme.of(context).textTheme.bodySmall),
+                        Text('全文检索 · 分类分布 · 内容永久保留，不自动删除', style: Theme.of(context).textTheme.bodySmall),
                       ],
                     ),
                   ),
@@ -182,7 +182,7 @@ class _LibraryPageState extends ConsumerState<LibraryPage> {
                           title: '知识库是空的',
                           subtitle: '在「发现」里添加来源，采集后会自动进入这里。',
                         )
-                      : Column(children: [for (final d in list.take(30)) _ResultTile(document: d)]),
+                      : Column(children: [for (final d in list) _ResultTile(document: d)]),
                 ),
               ],
             ],

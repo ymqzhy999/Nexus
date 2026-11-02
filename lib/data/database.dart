@@ -231,7 +231,7 @@ class AppDatabase extends _$AppDatabase {
     } catch (_) {}
   }
 
-  Future<List<Document>> searchDocuments(String query, {int limit = 80}) async {
+  Future<List<Document>> searchDocuments(String query, {int limit = 200}) async {
     final q = query.trim();
     if (q.isEmpty) return const [];
     List<int> ids = [];

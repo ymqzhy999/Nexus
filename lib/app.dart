@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/theme.dart';
+import 'features/catalog_page.dart';
 import 'features/discover_page.dart';
 import 'features/document_page.dart';
 import 'features/feed_page.dart';
@@ -31,6 +32,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(path: '/settings', builder: (context, state) => const SettingsPage()),
           ]),
         ],
+      ),
+      GoRoute(
+        path: '/catalog',
+        builder: (context, state) => const CatalogPage(),
       ),
       GoRoute(
         path: '/doc/:id',

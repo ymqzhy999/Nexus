@@ -196,3 +196,53 @@ List<String> _stringList(dynamic v) {
   }
   return const [];
 }
+
+class SourceMeta {
+  final String keyword;
+  final String fetchUrl;
+  final String searchTemplate;
+
+  const SourceMeta({
+    this.keyword = '',
+    this.fetchUrl = '',
+    this.searchTemplate = '',
+  });
+
+  bool get hasKeyword => keyword.trim().isNotEmpty;
+
+  factory SourceMeta.fromConfig(String raw) {
+    try {
+      final v = jsonDecode(raw);
+      if (v is Map) {
+        return SourceMeta(
+          keyword: (v['keyword'] ?? '').toString(),
+          fetchUrl: (v['fetch_url'] ?? '').toString(),
+          searchTemplate: (v['search_template'] ?? '').toString(),
+        );
+      }
+    } catch (_) {}
+    return const SourceMeta();
+  }
+
+  Map<String, dynamic> toJson() => {
+        if (keyword.isNotEmpty) 'keyword': keyword,
+        if (fetchUrl.isNotEmpty) 'fetch_url': fetchUrl,
+        if (searchTemplate.isNotEmpty) 'search_template': searchTemplate,
+      };
+
+  String toConfig() => jsonEncode(toJson());
+}
+
+List<CrawlItem> filterByKeyword(List<CrawlItem> items, String keyword) {
+  final terms = keyword
+      .toLowerCase()
+      .split(RegExp(r'\s+'))
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty)
+      .toList();
+  if (terms.isEmpty) return items;
+  return items.where((item) {
+    final hay = '${item.title} ${item.excerpt} ${item.content}'.toLowerCase();
+    return terms.every(hay.contains);
+  }).toList();
+}

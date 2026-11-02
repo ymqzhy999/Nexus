@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../catalog/catalog.dart';
 import '../core/models.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
@@ -18,6 +20,7 @@ class DiscoverPage extends ConsumerStatefulWidget {
 
 class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   final _controller = TextEditingController();
+  final _keyword = TextEditingController();
   SourceKind _mode = SourceKind.auto;
 
   static const _presets = [
@@ -30,6 +33,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _keyword.dispose();
     super.dispose();
   }
 
@@ -72,6 +76,40 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
             ),
             const SizedBox(height: 20),
             GlassCard(
+              accent: NColors.violet,
+              padding: const EdgeInsets.all(14),
+              onTap: () => context.push('/catalog'),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: NColors.violet.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: NColors.violet.withValues(alpha: 0.25)),
+                    ),
+                    child: const Icon(Icons.grid_view_rounded, size: 19, color: NColors.violet),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('精选来源库 · ${catalogSources.length} 个站点',
+                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700)),
+                        const SizedBox(height: 3),
+                        Text('按分类勾选站点，填关键词批量采集；不用记网址。',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5)),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, size: 13, color: NColors.violet),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            GlassCard(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,6 +134,16 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
                       ),
                     ),
                     onSubmitted: (_) => _start(),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _keyword,
+                    style: const TextStyle(fontSize: 12.5),
+                    decoration: const InputDecoration(
+                      hintText: '关键词（可选；多个词用空格分隔，只保留匹配内容）',
+                      prefixIcon: Icon(Icons.key, size: 16, color: NColors.muted),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   SingleChildScrollView(
@@ -259,7 +307,7 @@ class _DiscoverPageState extends ConsumerState<DiscoverPage> {
     final url = _controller.text.trim();
     if (url.isEmpty) return;
     FocusScope.of(context).unfocus();
-    ref.read(ingestProvider.notifier).addSource(url, hint: _mode);
+    ref.read(ingestProvider.notifier).addSource(url, hint: _mode, keyword: _keyword.text);
   }
 }
 
@@ -305,6 +353,7 @@ class _SourceCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final kind = SourceKindX.parse(source.kind);
+    final meta = SourceMeta.fromConfig(source.config);
     final failed = source.lastStatus == 'failed';
     final color = failed ? NColors.pink : (source.enabled ? NColors.cyan : NColors.muted);
     return GlassCard(
@@ -375,15 +424,19 @@ class _SourceCard extends ConsumerWidget {
                 decoration: BoxDecoration(shape: BoxShape.circle, color: color),
               ),
               const SizedBox(width: 5),
-              Text(
-                failed
-                    ? '失败'
-                    : source.lastRunAt == null
-                        ? '待运行'
-                        : '${prettyDate(source.lastRunAt)} · ${kind.label}',
-                style: kMono.copyWith(fontSize: 8.5),
+              Expanded(
+                child: Text(
+                  failed
+                      ? '失败'
+                      : source.lastRunAt == null
+                          ? '待运行'
+                          : '${prettyDate(source.lastRunAt)} · ${kind.label}'
+                              '${meta.hasKeyword ? ' · 关键词 ${meta.keyword}' : ''}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: kMono.copyWith(fontSize: 8.5),
+                ),
               ),
-              const Spacer(),
               GestureDetector(
                 onTap: () => ref.read(ingestProvider.notifier).refreshSource(source),
                 child: const Padding(

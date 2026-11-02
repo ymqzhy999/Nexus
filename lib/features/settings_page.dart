@@ -180,9 +180,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   label: '${s.maxAiPerRun} 篇',
                   onChanged: (v) => ref.read(settingsControllerProvider.notifier).setMaxAi(v.round()),
                 ),
-                Text(
-                  '省钱策略：只分析新内容；正文 hash 不变不会重复调用；每次分析的 Token 用量会记账。',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5, height: 1.6),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '省钱策略：只分析新内容；正文 hash 不变不会重复调用；每次分析的 Token 用量会记账。',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5, height: 1.6),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    NeonButton(
+                      label: '分析待处理',
+                      icon: Icons.auto_awesome,
+                      loading: ref.watch(aiQueueProvider).running,
+                      onTap: () => ref.read(aiQueueProvider.notifier).run(limit: 20),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -244,6 +258,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     Expanded(child: StatTile(value: '${stats.sources}', label: '来源', color: NColors.violet)),
                     Expanded(child: StatTile(value: '${stats.highValue}', label: '高价值', color: NColors.lime)),
                   ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '数据保留：永久。采集内容、原文和 AI 结果都不会自动删除；信息流最多展示 500 条，全部数据仍在本机。只有你手动删除来源/情报或清空全部数据时才会消失。',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10.5, height: 1.6),
                 ),
                 const SizedBox(height: 14),
                 GestureDetector(

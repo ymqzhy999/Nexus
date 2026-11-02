@@ -50,8 +50,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1.0
-          name: Nexus v0.1.0 — AI Intelligence Hub
+          tag_name: v0.2.0
+          name: Nexus v0.2.0 — Catalog & Keyword Intelligence
           body: |
             Nexus — Local-first AI intelligence hub (Android).
             Download `Nexus.apk` below and install it on your phone.
