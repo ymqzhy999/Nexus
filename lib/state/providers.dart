@@ -139,8 +139,6 @@ class AiQueueController extends StateNotifier<AiQueueState> {
       state = AiQueueState(error: e.toString());
     }
   }
-}
-
 
   Future<void> runOne(int documentId) async {
     if (state.running) return;
@@ -169,6 +167,7 @@ class AiQueueController extends StateNotifier<AiQueueState> {
       state = AiQueueState(error: e.toString());
     }
   }
+}
 
 final aiQueueProvider = StateNotifierProvider<AiQueueController, AiQueueState>(
   (ref) => AiQueueController(ref),
@@ -323,7 +322,7 @@ class IngestController extends StateNotifier<IngestState> {
       }
       await repo.finishRun(
         runId,
-        sourceId: created.id,
+        sourceId: source.id,
         found: outcome.items.length,
         added: added,
         sourceName: outcome.feedTitle,

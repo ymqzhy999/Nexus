@@ -60,7 +60,7 @@ CrawlOutcome parseFeed(String body, String baseUrl, {int limit = 30}) {
     var link = _firstText(node, ['link']) ?? '';
     if (link.isEmpty) {
       final linkEl = node.findAllElements('link').firstOrNull;
-      link = linkEl?.attributes['href'] ?? '';
+      link = linkEl?.getAttribute('href') ?? '';
     }
     if (link.isEmpty) continue;
     final content = _firstText(node, ['encoded', 'content', 'description', 'summary']) ?? '';
@@ -76,8 +76,8 @@ CrawlOutcome parseFeed(String body, String baseUrl, {int limit = 30}) {
       title: rawTitle.trim().isEmpty ? resolved : cleanText(rawTitle),
       content: cleanText(content),
       excerpt: cleanText(excerpt),
-      author: author,
-      imageUrl: image,
+      author: author ?? '',
+      imageUrl: image ?? '',
       publishedAt: published,
       raw: node.toXmlString(),
     ));

@@ -318,22 +318,22 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> wipeAll() async {
     await transaction(() async {
-      for (final table in [
-        documentTags,
-        collectionDocuments,
-        bookmarks,
-        aiAnalysis,
-        documents,
-        rawDocuments,
-        crawlRuns,
-        sources,
-        tags,
-        collections,
-        searchHistory,
-        syncOutbox,
-        settingsEntries,
+      for (final name in const [
+        'document_tags',
+        'collection_documents',
+        'bookmarks',
+        'ai_analysis',
+        'documents',
+        'raw_documents',
+        'crawl_runs',
+        'sources',
+        'tags',
+        'collections',
+        'search_history',
+        'sync_outbox',
+        'settings_entries',
       ]) {
-        await delete(table).go();
+        await customStatement('DELETE FROM $name');
       }
       await customStatement('DELETE FROM doc_fts');
     });

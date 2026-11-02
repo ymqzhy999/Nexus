@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../ai/deepseek.dart';
 import '../core/models.dart';
+import '../core/settings.dart';
 import '../core/theme.dart';
 import '../core/utils.dart';
 import '../core/widgets.dart';

@@ -19,7 +19,7 @@ Future<void> main() async {
   ));
   final settings = await SettingsController.load();
   try {
-    await BackgroundSync.configure(settings.backgroundSync);
+    await BackgroundSync.configure(settings.state.backgroundSync);
   } catch (_) {}
   runApp(
     ProviderScope(
