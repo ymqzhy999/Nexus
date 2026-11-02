@@ -82,7 +82,7 @@ class _DocumentPageState extends ConsumerState<DocumentPage> {
                 else
                   const SizedBox(height: 92),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 70),
+                  padding: EdgeInsets.fromLTRB(18, 18, 18, MediaQuery.paddingOf(context).bottom + 80),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

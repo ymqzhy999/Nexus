@@ -27,7 +27,8 @@ class DatasetsRepository {
   Future<Dataset?> getDataset(int id) =>
       (db.select(db.datasets)..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  Future<int> saveDataset(TableData table) async {
+  Future<int> saveDataset(TableData input) async {
+    final table = input.isWideYearTable ? input.toLongFormat() : input;
     final rows = table.rows.length > 20000 ? table.rows.take(20000).toList() : table.rows;
     return db.into(db.datasets).insert(DatasetsCompanion.insert(
           name: truncate(table.title.trim().isEmpty ? '未命名数据集' : table.title.trim(), 120),

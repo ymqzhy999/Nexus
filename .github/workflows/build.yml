@@ -53,8 +53,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.3.2
-          name: Nexus v0.3.2 — Data Lab
+          tag_name: v0.3.3
+          name: Nexus v0.3.3 — Data Lab
           body: |
             Nexus — Local-first AI intelligence hub (Android).
             Download `Nexus.apk` below and install it on your phone.

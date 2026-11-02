@@ -122,6 +122,59 @@ class TableData {
 
   bool get looksLikeIndex => rows.length < 3 || measureColumnCount == 0;
 
+  static int? headerYear(String h) {
+    final m = RegExp(r'(19|20)\d{2}').firstMatch(h);
+    if (m == null) return null;
+    return int.tryParse(m.group(0)!);
+  }
+
+  List<int> get yearHeaderColumns {
+    final out = <int>[];
+    for (var i = 0; i < headers.length; i++) {
+      if (headerYear(headers[i]) != null) out.add(i);
+    }
+    return out;
+  }
+
+  bool get isWideYearTable {
+    final yc = yearHeaderColumns;
+    if (yc.length < 2 || headers.length < 3) return false;
+    return yc.length >= headers.length - 2;
+  }
+
+  /// Convert a wide year table (indicator rows, year columns) into long format:
+  /// [指标, 年份, 数值]. This makes year filtering and trend metrics work.
+  TableData toLongFormat() {
+    final yc = yearHeaderColumns;
+    final labelCols = <int>[];
+    for (var i = 0; i < headers.length; i++) {
+      if (!yc.contains(i)) labelCols.add(i);
+    }
+    final outRows = <List<String>>[];
+    for (final r in rows) {
+      final label = labelCols
+          .where((i) => i < r.length && r[i].trim().isNotEmpty)
+          .map((i) => r[i].trim())
+          .join(' / ');
+      for (final c in yc) {
+        if (c >= r.length) continue;
+        final v = r[c].trim();
+        if (v.isEmpty) continue;
+        outRows.add([label.isEmpty ? '指标' : label, headers[c].trim(), v]);
+        if (outRows.length >= 20000) break;
+      }
+      if (outRows.length >= 20000) break;
+    }
+    return TableData(
+      title: title,
+      sourceUrl: sourceUrl,
+      sourceName: sourceName,
+      headers: const ['指标', '年份', '数值'],
+      rows: outRows,
+      meta: {...meta, 'wide_to_long': true, 'original_headers': headers},
+    );
+  }
+
   List<double?> numericSeries(int column, {int? yearColumnIndex, int? startYear, int? endYear}) {
     final years = yearColumnIndex ?? yearColumn();
     final out = <double?>[];

@@ -44,6 +44,7 @@ class _DataBrowserPageState extends ConsumerState<DataBrowserPage> {
         onPageStarted: (url) {
           _pageUrl = url;
           if (mounted) setState(() => _loading = true);
+          _installHooks();
         },
         onPageFinished: (url) async {
           if (mounted) setState(() => _loading = false);
@@ -183,14 +184,19 @@ class _DataBrowserPageState extends ConsumerState<DataBrowserPage> {
   }
   try {
     var all = collect(document, 'main');
-    var ifr = document.querySelectorAll('iframe');
-    for (var i = 0; i < ifr.length && i < 6; i++) {
+    var ifr = document.querySelectorAll('iframe,frame');
+    for (var i = 0; i < ifr.length && i < 8; i++) {
       try {
         if (ifr[i].contentDocument) {
-          all = all.concat(collect(ifr[i].contentDocument, 'iframe' + i));
+          all = all.concat(collect(ifr[i].contentDocument, 'frame' + i));
         }
       } catch (e) {}
     }
+    try {
+      for (var i = 0; i < window.frames.length && i < 8; i++) {
+        try { all = all.concat(collect(window.frames[i].document, 'wframe' + i)); } catch (e) {}
+      }
+    } catch (e) {}
     NexusTables.postMessage(JSON.stringify({
       tables: all,
       payloads: (window.__nexusData || []).slice(-12)
