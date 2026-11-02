@@ -22,6 +22,7 @@ class Datasets extends Table {
   DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
 }
 
+@DataClassName('DataAnalysis')
 class DataAnalyses extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get datasetId => integer().references(Datasets, #id, onDelete: KeyAction.cascade)();
