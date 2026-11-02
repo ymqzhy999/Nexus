@@ -269,7 +269,7 @@ class AppDatabase extends _$AppDatabase {
   Future<AppStats> loadStats() async {
     final row = await customSelect(
       'SELECT COUNT(*) AS c, SUM(CASE WHEN value_score >= 70 THEN 1 ELSE 0 END) AS hv, '
-      'SUM(CASE WHEN ai_status = "done" THEN 1 ELSE 0 END) AS an, AVG(value_score) AS av '
+      "SUM(CASE WHEN ai_status = 'done' THEN 1 ELSE 0 END) AS an, AVG(value_score) AS av "
       'FROM documents',
     ).getSingle();
     final src = await customSelect('SELECT COUNT(*) AS c FROM sources').getSingle();
@@ -287,7 +287,7 @@ class AppDatabase extends _$AppDatabase {
       'SELECT (SELECT COUNT(*) FROM documents) AS c, '
       '(SELECT COUNT(*) FROM sources) AS s, '
       '(SELECT COUNT(*) FROM documents WHERE value_score >= 70) AS hv, '
-      '(SELECT COUNT(*) FROM documents WHERE ai_status = "done") AS an, '
+      "(SELECT COUNT(*) FROM documents WHERE ai_status = 'done') AS an, " 
       '(SELECT COALESCE(AVG(value_score), 0) FROM documents) AS av',
     ).watchSingle().map((row) => AppStats(
           documents: row.read<int?>('c') ?? 0,
