@@ -146,7 +146,7 @@ const List<CatalogSource> catalogSources = [
   CatalogSource(id: 'register', name: 'The Register', url: 'https://www.theregister.com/headlines.atom', description: '带刺的英国科技新闻与评论', kind: SourceKind.atom, category: CatalogCategory.ai),
   CatalogSource(id: 'engadget', name: 'Engadget', url: 'https://www.engadget.com/rss.xml', description: '消费电子与科技产品新闻', kind: SourceKind.rss, category: CatalogCategory.ai),
   CatalogSource(id: 'cnet', name: 'CNET', url: 'https://www.cnet.com/rss/news/', description: '科技产品评测与购买指南', kind: SourceKind.atom, category: CatalogCategory.ai),
-  CatalogSource(id: 'decoder', name: 'The Decoder', url: 'https://the-decoder.com/feed/', description: 'AI 产业与模型进展的独立报道', kind: SourceKind.rss, category: CatalogCategory.ai'),
+  CatalogSource(id: 'decoder', name: 'The Decoder', url: 'https://the-decoder.com/feed/', description: 'AI 产业与模型进展的独立报道', kind: SourceKind.rss, category: CatalogCategory.ai),
   CatalogSource(id: 'daringfireball', name: 'Daring Fireball', url: 'https://daringfireball.net/feeds/main', description: 'John Gruber 的苹果与产品观察', kind: SourceKind.rss, category: CatalogCategory.ai),
   CatalogSource(id: 'cloudflare', name: 'Cloudflare Blog', url: 'https://blog.cloudflare.com/rss/', description: '网络、安全与边缘计算工程', kind: SourceKind.rss, category: CatalogCategory.code),
   CatalogSource(id: 'aws', name: 'AWS Blog', url: 'https://aws.amazon.com/blogs/aws/feed/', description: 'AWS 新产品与架构实践', kind: SourceKind.rss, category: CatalogCategory.code),

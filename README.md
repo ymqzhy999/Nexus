@@ -6,7 +6,17 @@ Nexus 是 Flutter 移动端应用（Android 优先），本地优先：采集内
 
 ---
 
-## 已实现（v0.1）
+## 已实现（v0.2）
+
+### 精选来源库 + 关键词采集
+
+- 内置 **60 个** 精选来源，覆盖 AI / 编程 / 商业 / 产品设计 / 科学 / 中文资讯 / 国际新闻 / 社区 / 关键词搜索
+- 按分类筛选、搜索、图标展示、多选勾选；内置「AI 日报 / 开发者 / 中文科技 / 国际视野」快捷组合
+- 关键词采集：
+  - Google News（中/英）、HN Algolia、arXiv、Stack Overflow、GitHub 仓库、Reddit、DEV 标签
+  - 普通 RSS / 网页也可填关键词，只保留标题或正文命中的内容
+- 批量采集进度、逐站失败原因、来源配置（关键词 + 实际抓取 URL）持久化
+- **数据永久保留，不自动删除**：信息流 / 知识库最多展示 500 条，全部原始记录与 AI 结果仍在本机
 
 ### 采集引擎（Dart，手机本地）
 
@@ -76,7 +86,7 @@ Drift + SQLite + FTS5（trigram，中文可搜）：
 
 1. push 到 `main` 触发 `.github/workflows/build.yml`
 2. 构建 `flutter build apk --release`
-3. 自动发布到 Release：`Nexus.apk`
+3. 自动发布到 Release：`Nexus.apk`（tag `v0.2.0`）
 
 本地构建：
 
@@ -104,10 +114,11 @@ Android 工程由 CI 用 `flutter create --platforms=android .` 生成，再由 
 ```
 lib/
   ai/            DeepSeek 客户端、分析编排
+  catalog/       60 个内置精选来源目录
   core/          主题、组件、模型、设置、工具
   crawl/         HTTP、提取器、统一引擎
   data/          Drift 数据库、Repository
-  features/      feed / discover / library / settings / document / reader
+  features/      feed / discover / catalog / library / settings / document / reader
   state/         Riverpod providers 与控制器
 ```
 
