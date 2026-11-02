@@ -13,6 +13,7 @@ import '../catalog/catalog.dart';
 import '../crawl/engine.dart';
 import '../crawl/http_client.dart';
 import '../data/database.dart';
+import '../data/datasets_repository.dart';
 import '../data/repository.dart';
 
 final dbProvider = Provider<AppDatabase>((ref) {
@@ -74,6 +75,22 @@ final libraryDocsProvider = FutureProvider<List<Document>>((ref) {
 
 final usageProvider = FutureProvider<AiUsage>((ref) {
   return ref.watch(repositoryProvider).usage();
+});
+
+final datasetsRepositoryProvider = Provider<DatasetsRepository>((ref) {
+  return DatasetsRepository(ref.watch(dbProvider));
+});
+
+final datasetsProvider = StreamProvider<List<Dataset>>((ref) {
+  return ref.watch(datasetsRepositoryProvider).watchDatasets();
+});
+
+final datasetProvider = FutureProvider.family<Dataset?, int>((ref, id) {
+  return ref.watch(datasetsRepositoryProvider).getDataset(id);
+});
+
+final datasetAnalysisProvider = FutureProvider.family<DataAnalysis?, int>((ref, id) {
+  return ref.watch(datasetsRepositoryProvider).latestAnalysis(id);
 });
 
 class AiQueueState {

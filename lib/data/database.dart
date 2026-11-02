@@ -9,6 +9,30 @@ import '../core/models.dart';
 
 part 'database.g.dart';
 
+
+class Datasets extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get sourceUrl => text().withDefault(const Constant(''))();
+  TextColumn get sourceName => text().withDefault(const Constant(''))();
+  TextColumn get columnsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get rowsJson => text().withDefault(const Constant('[]'))();
+  IntColumn get rowCount => integer().withDefault(const Constant(0))();
+  TextColumn get metaJson => text().withDefault(const Constant('{}'))();
+  DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
+}
+
+class DataAnalyses extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get datasetId => integer().references(Datasets, #id, onDelete: KeyAction.cascade)();
+  TextColumn get metricsJson => text().withDefault(const Constant('[]'))();
+  TextColumn get aiJson => text().withDefault(const Constant('{}'))();
+  TextColumn get model => text().withDefault(const Constant(''))();
+  IntColumn get inputTokens => integer().withDefault(const Constant(0))();
+  IntColumn get outputTokens => integer().withDefault(const Constant(0))();
+  DateTimeColumn get createdAt => dateTime().clientDefault(() => DateTime.now())();
+}
+
 class Sources extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
@@ -179,12 +203,14 @@ class SettingsEntries extends Table {
   SearchHistory,
   SyncOutbox,
   SettingsEntries,
+  Datasets,
+  DataAnalyses,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -193,6 +219,12 @@ class AppDatabase extends _$AppDatabase {
           await _createSearchIndex();
           for (final sql in _indexes) {
             await customStatement(sql);
+          }
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(datasets);
+            await m.createTable(dataAnalyses);
           }
         },
         beforeOpen: (details) async {
@@ -206,6 +238,8 @@ class AppDatabase extends _$AppDatabase {
     'CREATE INDEX IF NOT EXISTS idx_documents_score ON documents(value_score DESC)',
     'CREATE INDEX IF NOT EXISTS idx_documents_hash ON documents(content_hash)',
     'CREATE INDEX IF NOT EXISTS idx_ai_document ON ai_analysis(document_id)',
+    'CREATE INDEX IF NOT EXISTS idx_datasets_created ON datasets(created_at DESC)',
+    'CREATE INDEX IF NOT EXISTS idx_data_analyses_dataset ON data_analyses(dataset_id)',
   ];
 
   Future<void> _createSearchIndex() async {
@@ -319,6 +353,8 @@ class AppDatabase extends _$AppDatabase {
   Future<void> wipeAll() async {
     await transaction(() async {
       for (final name in const [
+        'data_analyses',
+        'datasets',
         'document_tags',
         'collection_documents',
         'bookmarks',

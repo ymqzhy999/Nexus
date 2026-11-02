@@ -38,6 +38,9 @@ jobs:
       - name: Generate Drift code
         run: dart run build_runner build --delete-conflicting-outputs
 
+      - name: Unit tests
+        run: flutter test
+
       - name: Static analysis
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
@@ -50,8 +53,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.2.0
-          name: Nexus v0.2.0 — Catalog & Keyword Intelligence
+          tag_name: v0.3.0
+          name: Nexus v0.3.0 — Data Lab
           body: |
             Nexus — Local-first AI intelligence hub (Android).
             Download `Nexus.apk` below and install it on your phone.

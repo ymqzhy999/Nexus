@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -29,6 +30,22 @@ class FetchException implements Exception {
 
   @override
   String toString() => message;
+}
+
+class FetchBytesResult {
+  final Uint8List bytes;
+  final int statusCode;
+  final String contentType;
+  final Uri uri;
+
+  FetchBytesResult({
+    required this.bytes,
+    required this.statusCode,
+    required this.contentType,
+    required this.uri,
+  });
+
+  bool get ok => statusCode >= 200 && statusCode < 400;
 }
 
 class _CacheEntry {
@@ -148,6 +165,54 @@ class HttpFetcher {
       }
     }
     throw last ?? FetchException('请求失败');
+  }
+
+  Future<FetchBytesResult> getBytes(
+    String url, {
+    Map<String, String>? headers,
+    int retries = 2,
+  }) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) throw FetchException('URL 格式不正确');
+    await _throttle(uri.host);
+    FetchException? last;
+    for (var attempt = 0; attempt <= retries; attempt++) {
+      try {
+        final response = await _dio.get<List<int>>(
+          url,
+          options: Options(responseType: ResponseType.bytes, headers: headers),
+        );
+        final status = response.statusCode ?? 0;
+        if (status == 429 || status >= 500) {
+          last = FetchException('服务器返回 HTTP $status', statusCode: status);
+          if (attempt < retries) {
+            await Future<void>.delayed(Duration(milliseconds: 700 * (attempt + 1)));
+            continue;
+          }
+          throw last;
+        }
+        if (status >= 400) {
+          throw FetchException(_describeStatus(status), statusCode: status);
+        }
+        return FetchBytesResult(
+          bytes: Uint8List.fromList(response.data ?? const []),
+          statusCode: status,
+          contentType: response.headers.value('content-type') ?? '',
+          uri: response.realUri,
+        );
+      } on FetchException {
+        rethrow;
+      } on DioException catch (e) {
+        last = FetchException(_describeDio(e));
+        if (attempt < retries) {
+          await Future<void>.delayed(Duration(milliseconds: 700 * (attempt + 1)));
+          continue;
+        }
+      } catch (e) {
+        last = FetchException('下载失败：$e');
+      }
+    }
+    throw last ?? FetchException('下载失败');
   }
 
   Future<void> _throttle(String host) async {

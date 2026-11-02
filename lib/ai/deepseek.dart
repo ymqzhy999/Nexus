@@ -217,6 +217,50 @@ $clipped
     return c.content.trim();
   }
 
+  Future<Map<String, dynamic>> suggestMetrics({
+    required String columns,
+    required String sampleRows,
+    required List<Map<String, String>> catalog,
+    String language = '中文',
+  }) async {
+    final c = await _completeJson(
+      system: '你是计量经济学与数据科学助教。你只能从给定指标目录中选择 key，绝不能发明指标或公式。'
+          '同时判断数据是否支持该指标；不支持就不要选。只输出 JSON。',
+      user: '数据列：\n$columns\n\n样例行：\n$sampleRows\n\n'
+          '可用指标目录（key | 名称 | 公式 | 假设）：\n'
+          '${catalog.map((e) => '${e['key']} | ${e['name']} | ${e['formula']} | ${e['assumption']}').join('\n')}\n\n'
+          '请返回：\n'
+          '{\n'
+          '  "metrics": [{"key": "目录里的 key", "value_column": "列名", "x_column": "可选列名", "y_column": "可选列名", "reason": "为什么适合，30 字内"}],\n'
+          '  "theories": ["solow_tfp", "cobb_douglas", "moore", "metcalfe", "digital_share", "hhi", "gini"],\n'
+          '  "summary": "这组数据最适合做的 2-3 个分析方向"\n'
+          '}\n'
+          'theories 只能从给定 key 中选；如果没有合适的就返回空数组。所有解释使用$language。',
+      maxTokens: 1200,
+    );
+    return c.json;
+  }
+
+  Future<String> interpretDataset({
+    required String context,
+    String language = '中文',
+  }) async {
+    final c = await _complete(
+      messages: [
+        {
+          'role': 'system',
+          'content': '你是 Nexus 的数据分析助手。只根据用户提供的计算结果和数据片段解释，'
+              '禁止编造任何数值、公式或因果关系。若证据不足，明确说“数据不足以判断”。'
+              '引用数值时必须与提供的结果一致。使用$language，400 字以内，分“趋势 / 结构 / 风险 / 可继续验证”四点。',
+        },
+        {'role': 'user', 'content': context},
+      ],
+      maxTokens: 1000,
+      temperature: 0.3,
+    );
+    return c.content.trim();
+  }
+
   String _analysisSystem(String language) => '''
 你是 Nexus 情报分析引擎，任务是把网页内容压缩成高密度、可检索、可排序的结构化情报。
 只输出合法 JSON，不要输出 Markdown 代码块，不要输出解释。

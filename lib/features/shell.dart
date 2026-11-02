@@ -14,6 +14,7 @@ class MainShell extends StatelessWidget {
     (Icons.radar, '信息流'),
     (Icons.explore_outlined, '发现'),
     (Icons.hub_outlined, '知识库'),
+    (Icons.science_outlined, '数据'),
     (Icons.tune, '设置'),
   ];
 
